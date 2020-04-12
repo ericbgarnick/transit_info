@@ -2,16 +2,9 @@ import enum
 import pycountry
 import pytz
 
+from mbta_info.flaskr.app import db
 
-import db as app_db
-
-db = app_db.db
-
-
-# noinspection PyArgumentList
-# Invalid enum with '/' character. e.g. TimeZone.Africa/Abidjan -> TimeZone.Africa_Abidjan
 TimeZone = enum.Enum('TimeZone', {tz.replace('/', '_'): tz for tz in pytz.all_timezones})
-# noinspection PyArgumentList
 LangCode = enum.Enum('LangCode', {lang.alpha_2: lang.alpha_2
                                   for lang in pycountry.languages
                                   if getattr(lang, 'alpha_2', None)})
@@ -31,6 +24,7 @@ class Agency(db.Model):
         self.agency_name = name
         self.agency_url = url
         self.agency_timezone = timezone
+        print("AGENCY TIMEZONE:", repr(self.agency_timezone))
 
         for fieldname, value in kwargs.items():
             setattr(self, fieldname, value)
@@ -94,7 +88,7 @@ class Route(db.Model):
     route_id = db.Column(db.String(64), primary_key=True)
     agency_id = db.Column(db.ForeignKey('agency.agency_id'), nullable=False)
     route_short_name = db.Column(db.String(16), nullable=True)
-    route_long_name = db.Column(db.String(128), nullable=False, unique=True)
+    route_long_name = db.Column(db.String(128), nullable=False)
     route_desc = db.Column(db.String(32), nullable=True)
     route_type = db.Column(db.Enum(RouteType), nullable=False)
     route_url = db.Column(db.String(64), nullable=True)
@@ -102,14 +96,14 @@ class Route(db.Model):
     route_text_color = db.Column(db.String(8), nullable=True)
     route_sort_order = db.Column(db.Integer, nullable=True)
     route_fare_class = db.Column(db.Enum(FareClass), nullable=True)
-    line_id = db.Column(db.String(32), db.ForeignKey('line.line_id'), nullable=False)
+    line_id = db.Column(db.String(32), db.ForeignKey('line.line_id'), nullable=True)
 
-    def __init__(self, route_id: str, agency_id: int, long_name: str, route_type: RouteType, line_id: str, **kwargs):
+    def __init__(self, route_id: str, agency_id: int, long_name: str, route_type: RouteType, **kwargs):
         self.route_id = route_id
         self.agency_id = agency_id
         self.route_long_name = long_name
         self.route_type = route_type
-        self.line_id = line_id
+        print("ROUTE TYPE:", repr(self.route_type))
 
         for fieldname, value in kwargs.items():
             setattr(self, fieldname, value)

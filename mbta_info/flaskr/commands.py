@@ -1,28 +1,33 @@
 import csv
-import glob
-import inspect
 import os
+from pathlib import Path
 
 from marshmallow import Schema
+from sqlalchemy.exc import DataError
 
-import models
-import schemas
-from db import db
-
-MODEL_NAMES = [m[0].lower() for m in inspect.getmembers(models, inspect.isclass) if m[1].__module__ == models.__name__]
+from mbta_info.flaskr import models
+from mbta_info.flaskr import schemas
+from mbta_info.flaskr.app import db
 
 DATA_FILES = ['agency.csv', 'lines.csv', 'routes.csv']
 
 
 def load_data():
+    here = Path(__name__).absolute().parent
+    print("HERE", here)
     for data_file_name in DATA_FILES:
-        path, file_name = os.path.split(data_file_path)
-        model_name = os.path.splitext(file_name)[0].rstrip('s')  # data file name may be pluralized
+        data_file_path = Path(here.absolute(), 'mbta_info', 'flaskr', 'data', data_file_name)
+        model_name = os.path.splitext(data_file_name)[0].rstrip('s')  # data file name may be pluralized
         model_schema = getattr(schemas, model_name.title() + 'Schema')()  # type: Schema
         with open(data_file_path, 'r') as f_in:
             reader = csv.DictReader(f_in)
             for data_row in reader:
                 new_object = model_schema.load(data_row)
                 db.session.add(new_object)
-    db.session.commit()
-    db.session.close()
+
+    try:
+        db.session.commit()
+    except DataError:
+        db.session.rollback()
+    finally:
+        db.session.close()
