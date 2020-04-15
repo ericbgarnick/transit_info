@@ -1,7 +1,9 @@
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow_enum import EnumField
 
-from mbta_info.flaskr.models import Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass
+from mbta_info.flaskr.models import (
+    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType
+)
 
 
 class AgencySchema(Schema):
@@ -14,7 +16,7 @@ class AgencySchema(Schema):
 
     @pre_load
     def convert_input(self, in_data, **kwargs):
-        in_data['agency_timezone'] = in_data['agency_timezone'].replace('/', '_')
+        in_data['agency_timezone'] = timezone_enum_key(in_data['agency_timezone'])
         in_data['agency_lang'] = in_data.get('agency_lang', '').lower() or None
         return in_data
 
@@ -34,7 +36,7 @@ class LineSchema(Schema):
     line_short_name = fields.Str()
     line_long_name = fields.Str(required=True)
     line_desc = fields.Str()
-    line_url = fields.Str()
+    line_url = fields.Url()
     line_color = fields.Str()
     line_text_color = fields.Str()
     line_sort_order = fields.Int()
@@ -55,7 +57,7 @@ class RouteSchema(Schema):
     route_long_name = fields.Str(required=True)
     route_desc = fields.Str()
     route_type = EnumField(RouteType, required=True)
-    route_url = fields.Str()
+    route_url = fields.Url()
     route_color = fields.Str()
     route_text_color = fields.Str()
     route_sort_order = fields.Int()
@@ -66,7 +68,7 @@ class RouteSchema(Schema):
     def convert_input(self, in_data, **kwargs):
         in_data.pop('listed_route', None)
         in_data['route_fare_class'] = in_data['route_fare_class'].replace(' ', '_').lower()
-        in_data['route_type'] = 'type_' + in_data['route_type']
+        in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
         in_data['line_id'] = in_data['line_id'] or None
         return in_data
 
@@ -79,3 +81,45 @@ class RouteSchema(Schema):
             data.pop('route_type'),
             **data
         )
+
+
+class StopSchema(Schema):
+    stop_id = fields.Str(required=True)
+    stop_code = fields.Str()
+    stop_name = fields.Str()
+    tts_stop_name = fields.Str()
+    stop_desc = fields.Str()
+    platform_code = fields.Str()
+    platform_name = fields.Str()
+    stop_lat = fields.Float()
+    stop_lon = fields.Float()
+    zone_id = fields.Str()
+    stop_address = fields.Str()
+    stop_url = fields.Url()
+    level_id = fields.Str()
+    location_type = EnumField(LocationType)
+    parent_station = fields.Str()
+    wheelchair_boarding = EnumField(AccessibilityType)
+    municipality = fields.Str()
+    on_street = fields.Str()
+    at_street = fields.Str()
+    vehicle_type = EnumField(RouteType)
+    stop_timezone = EnumField(TimeZone)
+
+    @pre_load
+    def convert_input(self, in_data, **kwargs):
+        in_data['location_type'] = numbered_type_enum_key(in_data['location_type'], default_0=True)
+        in_data['wheelchair_boarding'] = numbered_type_enum_key(in_data['wheelchair_boarding'], default_0=True)
+        in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
+        in_data['stop_timezone'] = timezone_enum_key(in_data['stop_timezone'])
+        return in_data
+
+
+def timezone_enum_key(raw_tz_name: str) -> str:
+    return raw_tz_name.replace('/', '_')
+
+
+def numbered_type_enum_key(numeral: str, default_0: bool = False) -> str:
+    if default_0:
+        numeral = numeral or '0'
+    return 'type_' + numeral

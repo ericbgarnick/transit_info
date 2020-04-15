@@ -163,7 +163,7 @@ class Stop(db.Model):
     stop_address = db.Column(db.String(128), nullable=True)
     stop_url = db.Column(db.String(64), nullable=True)
     level_id = db.Column(db.String(64), nullable=True)
-    location_type = db.Column(db.Enum(), nullable=True)
+    location_type = db.Column(db.Enum(LocationType), nullable=True)
     parent_station = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=True)
     wheelchair_boarding = db.Column(db.Enum(AccessibilityType), nullable=True)
     municipality = db.Column(db.String(64), nullable=True)
