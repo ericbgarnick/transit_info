@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
-    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType
+    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop
 )
 
 
@@ -110,9 +110,19 @@ class StopSchema(Schema):
     def convert_input(self, in_data, **kwargs):
         in_data['location_type'] = numbered_type_enum_key(in_data['location_type'], default_0=True)
         in_data['wheelchair_boarding'] = numbered_type_enum_key(in_data['wheelchair_boarding'], default_0=True)
-        in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
+        in_data['vehicle_type'] = numbered_type_enum_key(in_data['vehicle_type'])
         in_data['stop_timezone'] = timezone_enum_key(in_data['stop_timezone'])
         return in_data
+
+    @post_load
+    def make_stop(self, data, **kwargs):
+        lon = data.pop('stop_lon')
+        lat = data.pop('stop_lat')
+        data['stop_lonlat'] = f'POINT({lon} {lat})'
+        return Stop(
+            data.pop('stop_id'),
+            **data
+        )
 
 
 def timezone_enum_key(raw_tz_name: str) -> str:

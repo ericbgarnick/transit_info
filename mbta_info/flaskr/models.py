@@ -6,9 +6,9 @@ from geoalchemy2 import Geometry
 from mbta_info.flaskr.app import db
 
 TimeZone = enum.Enum('TimeZone', {tz.replace('/', '_'): tz for tz in pytz.all_timezones})
-LangCode = enum.Enum('LangCode', {lang.alpha_2: lang.alpha_2
-                                  for lang in pycountry.languages
-                                  if getattr(lang, 'alpha_2', None)})
+LangCode = enum.Enum('LangCode', {
+    lang.alpha_2: lang.alpha_2 for lang in pycountry.languages if getattr(lang, 'alpha_2', None)
+})
 
 
 class Agency(db.Model):
@@ -158,7 +158,8 @@ class Stop(db.Model):
     stop_desc = db.Column(db.String(256), nullable=True)
     platform_code = db.Column(db.String(8), nullable=True)
     platform_name = db.Column(db.String(64), nullable=True)
-    stop_loc = db.Column(Geometry('POINT'), nullable=True)
+    # to retrieve lon, lat: db.session.query(func.ST_X(Stop.stop_loc), func.ST_Y(Stop.stop_loc)).first()
+    stop_lonlat = db.Column(Geometry('POINT'), nullable=True)
     zone_id = db.Column(db.String(32), nullable=True)
     stop_address = db.Column(db.String(128), nullable=True)
     stop_url = db.Column(db.String(64), nullable=True)
