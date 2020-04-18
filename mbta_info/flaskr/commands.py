@@ -8,8 +8,8 @@ from sqlalchemy.exc import DataError
 from mbta_info.flaskr import schemas
 from mbta_info.flaskr.app import db
 
-# DATA_FILES = ['agency.csv', 'lines.csv', 'routes.csv']
-DATA_FILES = ['stops.csv']
+# DATA_FILES = ['agency.csv', 'lines.csv', 'routes.csv', 'stops.csv', 'calendar.csv']
+DATA_FILES = ['calendar.csv']
 
 
 def load_data():

@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
-    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop
+    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar
 )
 
 
@@ -17,13 +17,13 @@ class AgencySchema(Schema):
     agency_phone = fields.Str()
 
     @pre_load
-    def convert_input(self, in_data, **kwargs):
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
         in_data['agency_timezone'] = timezone_enum_key(in_data['agency_timezone'])
         in_data['agency_lang'] = in_data.get('agency_lang', '').lower()
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
-    def make_agency(self, data, **kwargs):
+    def make_agency(self, data: Dict, **kwargs) -> Agency:
         return Agency(
             data.pop('agency_id'),
             data.pop('agency_name'),
@@ -44,7 +44,7 @@ class LineSchema(Schema):
     line_sort_order = fields.Int()
 
     @post_load
-    def make_line(self, data, **kwargs):
+    def make_line(self, data: Dict, **kwargs) -> Line:
         return Line(
             data.pop('line_id'),
             data.pop('line_long_name'),
@@ -67,14 +67,14 @@ class RouteSchema(Schema):
     line_id = fields.Str()
 
     @pre_load
-    def convert_input(self, in_data, **kwargs):
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
         in_data.pop('listed_route', None)
         in_data['route_fare_class'] = in_data['route_fare_class'].replace(' ', '_').lower()
         in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
-    def make_route(self, data, **kwargs):
+    def make_route(self, data: Dict, **kwargs) -> Route:
         return Route(
             data.pop('route_id'),
             data.pop('agency_id'),
@@ -108,7 +108,7 @@ class StopSchema(Schema):
     stop_timezone = EnumField(TimeZone)
 
     @pre_load
-    def convert_input(self, in_data, **kwargs):
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
         in_data['location_type'] = numbered_type_enum_key(in_data['location_type'], default_0=True)
         in_data['wheelchair_boarding'] = numbered_type_enum_key(in_data['wheelchair_boarding'], default_0=True)
         in_data['vehicle_type'] = numbered_type_enum_key(in_data['vehicle_type'])
@@ -116,7 +116,7 @@ class StopSchema(Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
-    def make_stop(self, data, **kwargs):
+    def make_stop(self, data: Dict, **kwargs) -> Stop:
         try:
             lon = data.pop('stop_lon')
             lat = data.pop('stop_lat')
@@ -126,6 +126,42 @@ class StopSchema(Schema):
         return Stop(
             data.pop('stop_id'),
             **data
+        )
+
+
+class CalendarSchema(Schema):
+    DATE_INPUT_FORMAT = '%Y%m%d'
+
+    service_id = fields.Str(required=True)
+    monday = fields.Bool(required=True)
+    tuesday = fields.Bool(required=True)
+    wednesday = fields.Bool(required=True)
+    thursday = fields.Bool(required=True)
+    friday = fields.Bool(required=True)
+    saturday = fields.Bool(required=True)
+    sunday = fields.Bool(required=True)
+    start_date = fields.Date(format=DATE_INPUT_FORMAT, required=True)
+    end_date = fields.Date(format=DATE_INPUT_FORMAT, required=True)
+
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+            in_data[day] = bool(int(in_data[day]))
+        return in_data
+
+    @post_load
+    def make_calendar(self, data: Dict, **kwargs) -> Calendar:
+        return Calendar(
+            data.pop('service_id'),
+            data.pop('monday'),
+            data.pop('tuesday'),
+            data.pop('wednesday'),
+            data.pop('thursday'),
+            data.pop('friday'),
+            data.pop('saturday'),
+            data.pop('sunday'),
+            data.pop('start_date'),
+            data.pop('end_date'),
         )
 
 
