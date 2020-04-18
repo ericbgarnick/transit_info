@@ -153,7 +153,7 @@ class Stop(db.Model):
     """
     stop_id = db.Column(db.String(64), primary_key=True)
     stop_code = db.Column(db.String(64), nullable=True)  # Often the same as stop_id (or shortened version thereof)
-    stop_name = db.Column(db.String(64), nullable=True)
+    stop_name = db.Column(db.String(128), nullable=True)
     tts_stop_name = db.Column(db.String(64), nullable=True)  # Defaults to stop_name - used to resolve TTS ambiguities
     stop_desc = db.Column(db.String(256), nullable=True)
     platform_code = db.Column(db.String(8), nullable=True)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow_enum import EnumField
 
@@ -17,8 +19,8 @@ class AgencySchema(Schema):
     @pre_load
     def convert_input(self, in_data, **kwargs):
         in_data['agency_timezone'] = timezone_enum_key(in_data['agency_timezone'])
-        in_data['agency_lang'] = in_data.get('agency_lang', '').lower() or None
-        return in_data
+        in_data['agency_lang'] = in_data.get('agency_lang', '').lower()
+        return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_agency(self, data, **kwargs):
@@ -62,15 +64,14 @@ class RouteSchema(Schema):
     route_text_color = fields.Str()
     route_sort_order = fields.Int()
     route_fare_class = EnumField(FareClass)
-    line_id = fields.Str(allow_none=True)
+    line_id = fields.Str()
 
     @pre_load
     def convert_input(self, in_data, **kwargs):
         in_data.pop('listed_route', None)
         in_data['route_fare_class'] = in_data['route_fare_class'].replace(' ', '_').lower()
         in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
-        in_data['line_id'] = in_data['line_id'] or None
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_route(self, data, **kwargs):
@@ -111,25 +112,28 @@ class StopSchema(Schema):
         in_data['location_type'] = numbered_type_enum_key(in_data['location_type'], default_0=True)
         in_data['wheelchair_boarding'] = numbered_type_enum_key(in_data['wheelchair_boarding'], default_0=True)
         in_data['vehicle_type'] = numbered_type_enum_key(in_data['vehicle_type'])
-        in_data['stop_timezone'] = timezone_enum_key(in_data['stop_timezone'])
-        return in_data
+        in_data['stop_timezone'] = timezone_enum_key(in_data.get('stop_timezone'))
+        return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_stop(self, data, **kwargs):
-        lon = data.pop('stop_lon')
-        lat = data.pop('stop_lat')
-        data['stop_lonlat'] = f'POINT({lon} {lat})'
+        try:
+            lon = data.pop('stop_lon')
+            lat = data.pop('stop_lat')
+            data['stop_lonlat'] = f'POINT({lon} {lat})'
+        except KeyError:
+            pass
         return Stop(
             data.pop('stop_id'),
             **data
         )
 
 
-def timezone_enum_key(raw_tz_name: str) -> str:
-    return raw_tz_name.replace('/', '_')
+def timezone_enum_key(raw_tz_name: str) -> Optional[str]:
+    return raw_tz_name.replace('/', '_') if raw_tz_name else raw_tz_name
 
 
-def numbered_type_enum_key(numeral: str, default_0: bool = False) -> str:
+def numbered_type_enum_key(numeral: str, default_0: bool = False) -> Optional[str]:
     if default_0:
         numeral = numeral or '0'
-    return 'type_' + numeral
+    return 'type_' + numeral if numeral else None
