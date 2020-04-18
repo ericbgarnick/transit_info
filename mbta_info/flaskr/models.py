@@ -1,3 +1,4 @@
+import datetime
 import enum
 import pycountry
 import pytz
@@ -181,3 +182,38 @@ class Stop(db.Model):
 
     def __repr__(self):
         return f'<Stop: {self.stop_id}: {self.stop_name}>'
+
+
+class Calendar(db.Model):
+    """
+    Identifies the days of service within a given date range
+    Requires: service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_date, end_date
+    Relies on: None
+    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#calendartxt
+    """
+    service_id = db.Column(db.String(64), primary_key=True)
+    monday = db.Column(db.Boolean(), nullable=False)
+    tuesday = db.Column(db.Boolean(), nullable=False)
+    wednesday = db.Column(db.Boolean(), nullable=False)
+    thursday = db.Column(db.Boolean(), nullable=False)
+    friday = db.Column(db.Boolean(), nullable=False)
+    saturday = db.Column(db.Boolean(), nullable=False)
+    sunday = db.Column(db.Boolean(), nullable=False)
+    start_date = db.Column(db.Date(), nullable=False)
+    end_date = db.Column(db.Date(), nullable=False)
+
+    def __init__(self, service_id: str, monday: bool, tuesday: bool, wednesday: bool, thursday: bool,  friday: bool,
+                 saturday: bool, sunday: bool, start_date: datetime.date, end_date: datetime.date):
+        self.service_id = service_id
+        self.monday = monday
+        self.tuesday = tuesday
+        self.wednesday = wednesday
+        self.thursday = thursday
+        self.friday = friday
+        self.saturday = saturday
+        self.sunday = sunday
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def __repr__(self):
+        return f'<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>'
