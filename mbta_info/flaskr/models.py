@@ -217,3 +217,27 @@ class Calendar(db.Model):
 
     def __repr__(self):
         return f'<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>'
+
+
+class Shape(db.Model):
+    """
+    A rule for mapping vehicle travel paths, sometimes referred to as a route alignment
+    Requires: shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence
+    Relies on: None
+    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
+    """
+    shape_id = db.Column(db.String(64), primary_key=True)
+    shape_pt_lonlat = db.Column(Geometry('POINT'), nullable=False)
+    shape_pt_sequence = db.Column(db.Integer())  # Increasing but not necessarily consecutive for each subsequent stop
+    shape_dist_traveled = db.Column(db.Float())
+
+
+class Trip(db.Model):
+    """
+    A trip for a route in a transit system. A trip is a sequence
+    of two or more stops that occur during a specific time period.
+    Requires: route_id, service_id, trip_id
+    Relies on: Route, Calendar, Shape
+    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
+    """
+    pass
