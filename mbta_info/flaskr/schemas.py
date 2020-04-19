@@ -165,6 +165,10 @@ class CalendarSchema(Schema):
         )
 
 
+class ShapeSchema(Schema):
+    pass
+
+
 def timezone_enum_key(raw_tz_name: str) -> Optional[str]:
     return raw_tz_name.replace('/', '_') if raw_tz_name else raw_tz_name
 

@@ -1,15 +1,62 @@
 import datetime
 import enum
+import logging
+from typing import Tuple, Optional
+
 import pycountry
 import pytz
 from geoalchemy2 import Geometry
+from sqlalchemy import func, inspect
+from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr.app import db
 
+logger = logging.getLogger(__name__)
+
+# noinspection PyTypeChecker
 TimeZone = enum.Enum('TimeZone', {tz.replace('/', '_'): tz for tz in pytz.all_timezones})
+# noinspection PyTypeChecker
 LangCode = enum.Enum('LangCode', {
     lang.alpha_2: lang.alpha_2 for lang in pycountry.languages if getattr(lang, 'alpha_2', None)
 })
+
+
+class GeoMixin:
+    _longitude_cache = None
+    _latitude_cache = None
+
+    @property
+    def longitude(self) -> float:
+        if self._longitude_cache is None:
+            self._longitude_cache, self._latitude_cache = self.lonlat
+        return self._longitude_cache
+
+    @property
+    def latitude(self) -> float:
+        if self._latitude_cache is None:
+            self._longitude_cache, self._latitude_cache = self.lonlat
+        return self._latitude_cache
+
+    @property
+    def lonlat(self) -> Optional[Tuple[float, float]]:
+        """
+        Return a tuple of (lon, lat) or return None and log exception if no coordinates can be retrieved.
+
+        Note: Should only be called if self._longitude_cache and self._latitude_cache are not set
+        """
+        lonlat_value = getattr(self, self.lonlat_field)
+        try:
+            lon, lat = db.session.query(func.ST_X(lonlat_value), func.ST_Y(lonlat_value)).first()
+            db.session.close()
+            return lon, lat
+        except DataError:
+            logger.exception(f"Failed to get lon, lat for Shape {inspect(self).identity[0]}")
+            db.session.close()
+
+    @property
+    def lonlat_field(self) -> str:
+        """Return the name of the field where longitude and latitude are stored"""
+        raise NotImplementedError
 
 
 class Agency(db.Model):
@@ -145,7 +192,7 @@ class AccessibilityType(enum.Enum):
     type_2 = 'inaccessible'
 
 
-class Stop(db.Model):
+class Stop(db.Model, GeoMixin):
     """
     A transit stop
     Requires: stop_id
@@ -159,7 +206,7 @@ class Stop(db.Model):
     stop_desc = db.Column(db.String(256), nullable=True)
     platform_code = db.Column(db.String(8), nullable=True)
     platform_name = db.Column(db.String(64), nullable=True)
-    # to retrieve lon, lat: db.session.query(func.ST_X(Stop.stop_loc), func.ST_Y(Stop.stop_loc)).first()
+    # to retrieve lon, lat: db.session.query(func.ST_X(Stop.stop_lonlat), func.ST_Y(Stop.stop_lonlat)).first()
     stop_lonlat = db.Column(Geometry('POINT'), nullable=True)
     zone_id = db.Column(db.String(32), nullable=True)
     stop_address = db.Column(db.String(128), nullable=True)
@@ -182,6 +229,11 @@ class Stop(db.Model):
 
     def __repr__(self):
         return f'<Stop: {self.stop_id}: {self.stop_name}>'
+
+    @property
+    def lonlat_field(self) -> str:
+        """Return the name of the field where longitude and latitude are stored"""
+        return 'stop_lonlat'
 
 
 class Calendar(db.Model):
@@ -219,10 +271,10 @@ class Calendar(db.Model):
         return f'<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>'
 
 
-class Shape(db.Model):
+class Shape(db.Model, GeoMixin):
     """
     A rule for mapping vehicle travel paths, sometimes referred to as a route alignment
-    Requires: shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence
+    Requires: shape_id, shape_pt_lon, shape_pt_lat, shape_pt_sequence
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
     """
@@ -231,13 +283,31 @@ class Shape(db.Model):
     shape_pt_sequence = db.Column(db.Integer())  # Increasing but not necessarily consecutive for each subsequent stop
     shape_dist_traveled = db.Column(db.Float())
 
+    def __init__(self, shape_id: str, shape_pt_lon: float, shape_pt_lat: float, shape_pt_sequence: int, **kwargs):
+        self._longitude_cache = shape_pt_lon
+        self._latitude_cache = shape_pt_lat
+        self.shape_id = shape_id
+        self.shape_pt_lonlat = f'POINT({shape_pt_lon} {shape_pt_lat})'
+        self.shape_pt_sequence = shape_pt_sequence
 
-class Trip(db.Model):
-    """
-    A trip for a route in a transit system. A trip is a sequence
-    of two or more stops that occur during a specific time period.
-    Requires: route_id, service_id, trip_id
-    Relies on: Route, Calendar, Shape
-    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
-    """
-    pass
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f'<Shape: {self.shape_id} @ ({self.longitude}, {self.latitude})>'
+
+    @property
+    def lonlat_field(self) -> str:
+        """Return the name of the field where longitude and latitude are stored"""
+        return 'shape_pt_lonlat'
+
+
+# class Trip(db.Model):
+#     """
+#     A trip for a route in a transit system. A trip is a sequence
+#     of two or more stops that occur during a specific time period.
+#     Requires: route_id, service_id, trip_id
+#     Relies on: Route, Calendar, Shape
+#     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
+#     """
+#     pass
