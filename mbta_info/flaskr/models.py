@@ -153,7 +153,8 @@ class Route(db.Model):
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#routestxt
     """
     route_id = db.Column(db.String(64), primary_key=True)
-    agency_id = db.Column(db.ForeignKey('agency.agency_id'), nullable=False)
+    agency_id = db.Column(db.Integer, db.ForeignKey('agency.agency_id'), nullable=False)
+    agency = db.relationship('Agency', backref='routes')
     route_short_name = db.Column(db.String(16), nullable=True)
     route_long_name = db.Column(db.String(128), nullable=False)
     route_desc = db.Column(db.String(32), nullable=True)
@@ -164,6 +165,7 @@ class Route(db.Model):
     route_sort_order = db.Column(db.Integer, nullable=True)
     route_fare_class = db.Column(db.Enum(FareClass), nullable=True)
     line_id = db.Column(db.String(32), db.ForeignKey('line.line_id'), nullable=True)
+    line = db.relationship('Line', backref='routes')
 
     def __init__(self, route_id: str, agency_id: int, long_name: str, route_type: RouteType, **kwargs):
         self.route_id = route_id
@@ -214,6 +216,7 @@ class Stop(db.Model, GeoMixin):
     level_id = db.Column(db.String(64), nullable=True)
     location_type = db.Column(db.Enum(LocationType), nullable=True)
     parent_station = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=True)
+    parent = db.relationship('Stop', backref='children')
     wheelchair_boarding = db.Column(db.Enum(AccessibilityType), nullable=True)
     municipality = db.Column(db.String(64), nullable=True)
     on_street = db.Column(db.String(64), nullable=True)
@@ -319,13 +322,16 @@ class Trip(db.Model):
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
     """
     trip_id = db.Column(db.String(128), primary_key=True)
-    route_id = db.Column(db.String(64), nullable=False, index=True)
-    service_id = db.Column(db.String(64), nullable=False, index=True)
+    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False, index=True)
+    route = db.relationship('Route', backref='trips')
+    service_id = db.Column(db.String(64), db.ForeignKey('calendar.service_id'), nullable=False, index=True)
+    service = db.relationship('Calendar', backref='trips')
     trip_headsign = db.Column(db.String(128), nullable=True)
     trip_short_name = db.Column(db.String(16), nullable=True)
     direction_id = db.Column(db.SmallInteger(), nullable=True)  # 0 or 1
     block_id = db.Column(db.String(64), nullable=True)
-    shape_id = db.Column(db.String(64), nullable=True, index=True)
+    shape_id = db.Column(db.String(64), db.ForeignKey('shape.shape_id'), nullable=True, index=True)
+    shape = db.relationship('Shape', backref='trips')
     wheelchair_accessible = db.Column(db.Enum(TripAccessibility), nullable=True)
     bikes_allowed = db.Column(db.Enum(TripAccessibility), nullable=True)
 

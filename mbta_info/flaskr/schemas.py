@@ -5,7 +5,7 @@ from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
     Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
-    Shape
+    Shape, TripAccessibility, Trip
 )
 
 
@@ -184,6 +184,34 @@ class ShapeSchema(Schema):
             data.pop('shape_pt_lon'),
             data.pop('shape_pt_lat'),
             data.pop('shape_pt_sequence'),
+            **data
+        )
+
+
+class TripSchema(Schema):
+    route_id = fields.Str(required=True)
+    service_id = fields.Str(required=True)
+    trip_id = fields.Str(required=True)
+    trip_headsign = fields.Str()
+    trip_short_name = fields.Str()
+    direction_id = fields.Int()
+    block_id = fields.Str()
+    shape_id = fields.Str()
+    wheelchair_accessible = EnumField(TripAccessibility)
+    bikes_allowed = EnumField(TripAccessibility)
+
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        in_data['wheelchair_accessible'] = numbered_type_enum_key(in_data['wheelchair_accessible'], default_0=True)
+        in_data['bikes_allowed'] = numbered_type_enum_key(in_data['bikes_allowed'], default_0=True)
+        return {k: v for k, v in in_data.items() if v}
+
+    @post_load
+    def make_trip(self, data: Dict, **kwargs) -> Trip:
+        return Trip(
+            trip_id=data.pop('trip_id'),
+            route_id=data.pop('route_id'),
+            service_id=data.pop('service_id'),
             **data
         )
 
