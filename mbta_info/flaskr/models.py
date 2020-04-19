@@ -72,7 +72,6 @@ class Agency(db.Model):
     agency_timezone = db.Column(db.Enum(TimeZone), nullable=False)
     agency_lang = db.Column(db.Enum(LangCode), nullable=True)
     agency_phone = db.Column(db.String(16), nullable=True)
-    routes = db.relationship('Route', backref='agency', lazy=True)
 
     def __init__(self, agency_id: int, name: str, url: str, timezone: TimeZone, **kwargs):
         self.agency_id = agency_id
@@ -102,7 +101,6 @@ class Line(db.Model):
     line_color = db.Column(db.String(8), nullable=True)
     line_text_color = db.Column(db.String(8), nullable=True)
     line_sort_order = db.Column(db.Integer, nullable=True)
-    routes = db.relationship('Route', backref='line', lazy=True)
 
     def __init__(self, line_id: str, long_name: str, **kwargs):
         self.line_id = line_id
@@ -216,7 +214,7 @@ class Stop(db.Model, GeoMixin):
     level_id = db.Column(db.String(64), nullable=True)
     location_type = db.Column(db.Enum(LocationType), nullable=True)
     parent_station = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=True)
-    parent = db.relationship('Stop', backref='children')
+    parent = db.relationship('Stop', backref='children', remote_side=[stop_id])
     wheelchair_boarding = db.Column(db.Enum(AccessibilityType), nullable=True)
     municipality = db.Column(db.String(64), nullable=True)
     on_street = db.Column(db.String(64), nullable=True)
@@ -330,8 +328,7 @@ class Trip(db.Model):
     trip_short_name = db.Column(db.String(16), nullable=True)
     direction_id = db.Column(db.SmallInteger(), nullable=True)  # 0 or 1
     block_id = db.Column(db.String(64), nullable=True)
-    shape_id = db.Column(db.String(64), db.ForeignKey('shape.shape_id'), nullable=True, index=True)
-    shape = db.relationship('Shape', backref='trips')
+    shape_id = db.Column(db.String(64), nullable=True)
     wheelchair_accessible = db.Column(db.Enum(TripAccessibility), nullable=True)
     bikes_allowed = db.Column(db.Enum(TripAccessibility), nullable=True)
 

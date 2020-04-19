@@ -44,6 +44,10 @@ class LineSchema(Schema):
     line_text_color = fields.Str()
     line_sort_order = fields.Int()
 
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        return {k: v for k, v in in_data.items() if v}
+
     @post_load
     def make_line(self, data: Dict, **kwargs) -> Line:
         return Line(

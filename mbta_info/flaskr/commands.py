@@ -9,7 +9,7 @@ from mbta_info.flaskr import schemas
 from mbta_info.flaskr.app import db
 
 # DATA_FILES = ['agency.csv', 'lines.csv', 'routes.csv', 'stops.csv', 'calendar.csv', 'shapes.csv']
-DATA_FILES = ['shapes.csv']
+DATA_FILES = ['trips.csv']
 
 
 def load_data():
