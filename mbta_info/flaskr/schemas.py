@@ -4,7 +4,8 @@ from marshmallow import Schema, fields, pre_load, post_load
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
-    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar
+    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
+    Shape
 )
 
 
@@ -166,7 +167,25 @@ class CalendarSchema(Schema):
 
 
 class ShapeSchema(Schema):
-    pass
+    shape_id = fields.Str(required=True)
+    shape_pt_lat = fields.Float(required=True)
+    shape_pt_lon = fields.Float(required=True)
+    shape_pt_sequence = fields.Int(required=True)
+    shape_dist_traveled = fields.Float()
+
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        return {k: v for k, v in in_data.items() if v}
+
+    @post_load
+    def make_shape(self, data: Dict, **kwargs) -> Shape:
+        return Shape(
+            data.pop('shape_id'),
+            data.pop('shape_pt_lon'),
+            data.pop('shape_pt_lat'),
+            data.pop('shape_pt_sequence'),
+            **data
+        )
 
 
 def timezone_enum_key(raw_tz_name: str) -> Optional[str]:

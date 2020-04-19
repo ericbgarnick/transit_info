@@ -278,7 +278,8 @@ class Shape(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
     """
-    shape_id = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    shape_id = db.Column(db.String(64), nullable=False, index=True)
     shape_pt_lonlat = db.Column(Geometry('POINT'), nullable=False)
     shape_pt_sequence = db.Column(db.Integer())  # Increasing but not necessarily consecutive for each subsequent stop
     shape_dist_traveled = db.Column(db.Float())
