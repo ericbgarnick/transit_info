@@ -207,7 +207,7 @@ class Stop(db.Model, GeoMixin):
     platform_code = db.Column(db.String(8), nullable=True)
     platform_name = db.Column(db.String(64), nullable=True)
     # to retrieve lon, lat: db.session.query(func.ST_X(Stop.stop_lonlat), func.ST_Y(Stop.stop_lonlat)).first()
-    stop_lonlat = db.Column(Geometry('POINT'), nullable=True)
+    stop_lonlat = db.Column(Geometry('POINT'), nullable=True, index=True)
     zone_id = db.Column(db.String(32), nullable=True)
     stop_address = db.Column(db.String(128), nullable=True)
     stop_url = db.Column(db.String(64), nullable=True)
@@ -281,8 +281,9 @@ class Shape(db.Model, GeoMixin):
     id = db.Column(db.Integer, primary_key=True)
     shape_id = db.Column(db.String(64), nullable=False, index=True)
     shape_pt_lonlat = db.Column(Geometry('POINT'), nullable=False)
-    shape_pt_sequence = db.Column(db.Integer())  # Increasing but not necessarily consecutive for each subsequent stop
-    shape_dist_traveled = db.Column(db.Float())
+    # Increasing but not necessarily consecutive for each subsequent stop
+    shape_pt_sequence = db.Column(db.Integer(), nullable=False)
+    shape_dist_traveled = db.Column(db.Float(), nullable=True)
 
     def __init__(self, shape_id: str, shape_pt_lon: float, shape_pt_lat: float, shape_pt_sequence: int, **kwargs):
         self._longitude_cache = shape_pt_lon
@@ -303,12 +304,38 @@ class Shape(db.Model, GeoMixin):
         return 'shape_pt_lonlat'
 
 
-# class Trip(db.Model):
-#     """
-#     A trip for a route in a transit system. A trip is a sequence
-#     of two or more stops that occur during a specific time period.
-#     Requires: route_id, service_id, trip_id
-#     Relies on: Route, Calendar, Shape
-#     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
-#     """
-#     pass
+class TripAccessibility(enum.Enum):
+    type_0 = 'unknown'      # Default when no value given
+    type_1 = 'one_or_more'  # One or more bikes or wheelchairs can be accommodated on this trip
+    type_2 = 'none'         # No bikes or wheelchairs can be accommodated on this trip
+
+
+class Trip(db.Model):
+    """
+    A trip for a route in a transit system. A trip is a sequence
+    of two or more stops that occur during a specific time period.
+    Requires: route_id, service_id, trip_id
+    Relies on: Route, Calendar, Shape
+    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
+    """
+    trip_id = db.Column(db.String(128), primary_key=True)
+    route_id = db.Column(db.String(64), nullable=False, index=True)
+    service_id = db.Column(db.String(64), nullable=False, index=True)
+    trip_headsign = db.Column(db.String(128), nullable=True)
+    trip_short_name = db.Column(db.String(16), nullable=True)
+    direction_id = db.Column(db.SmallInteger(), nullable=True)  # 0 or 1
+    block_id = db.Column(db.String(64), nullable=True)
+    shape_id = db.Column(db.String(64), nullable=True, index=True)
+    wheelchair_accessible = db.Column(db.Enum(TripAccessibility), nullable=True)
+    bikes_allowed = db.Column(db.Enum(TripAccessibility), nullable=True)
+
+    def __init__(self, trip_id: str, route_id: str, service_id: str, **kwargs):
+        self.trip_id = trip_id
+        self.route_id = route_id
+        self.service_id = service_id
+
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f'<Trip: {self.trip_id} ({self.route_id} @ {self.service_id})>'
