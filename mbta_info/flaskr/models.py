@@ -22,6 +22,7 @@ LangCode = enum.Enum('LangCode', {
 
 
 class GeoMixin:
+    """A mixin class for models having a Geometry POINT field - allows convenient, cached access to lon/lat values"""
     _longitude_cache = None
     _latitude_cache = None
 
