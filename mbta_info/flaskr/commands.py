@@ -8,16 +8,25 @@ from sqlalchemy.exc import DataError
 from mbta_info.flaskr import schemas
 from mbta_info.flaskr.app import db
 
-# DATA_FILES = ['agency.csv', 'lines.csv', 'routes.csv', 'stops.csv', 'calendar.csv', 'shapes.csv']
-DATA_FILES = ['trips.csv']
+DATA_FILES = [
+    'agency.csv',
+    'lines.csv',
+    'routes.csv',
+    'stops.csv',
+    'calendar.csv',
+    'shapes.csv',
+    'route_patterns.csv',
+    'trips.csv'
+]
+# DATA_FILES = ['trips.csv']
 
 
 def load_data():
     here = Path(__name__).absolute().parent
     for data_file_name in DATA_FILES:
         data_file_path = Path(here.absolute(), 'mbta_info', 'flaskr', 'data', data_file_name)
-        model_name = os.path.splitext(data_file_name)[0].rstrip('s')  # data file name may be pluralized
-        model_schema = getattr(schemas, model_name.title() + 'Schema')()  # type: Schema
+        model_name = create_model_name(data_file_name)
+        model_schema = getattr(schemas, model_name + 'Schema')()  # type: Schema
         with open(data_file_path, 'r') as f_in:
             reader = csv.DictReader(f_in)
             row_count = 0
@@ -39,3 +48,9 @@ def load_data():
         db.session.rollback()
     finally:
         db.session.close()
+
+
+def create_model_name(data_file_name: str) -> str:
+    raw_file_name = os.path.splitext(data_file_name)[0]
+    words_no_plural = raw_file_name.rstrip('s').split('_')
+    return ''.join([word.title() for word in words_no_plural])

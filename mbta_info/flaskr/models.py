@@ -84,7 +84,7 @@ class Agency(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Agency: {self.agency_name}>'
+        return f'<Agency: {self.agency_id} ({self.agency_name})>'
 
 
 class Line(db.Model):
@@ -230,7 +230,7 @@ class Stop(db.Model, GeoMixin):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Stop: {self.stop_id}: {self.stop_name}>'
+        return f'<Stop: {self.stop_id} ({self.stop_name})>'
 
     @property
     def lonlat_field(self) -> str:
@@ -306,6 +306,34 @@ class Shape(db.Model, GeoMixin):
         return 'shape_pt_lonlat'
 
 
+class RoutePattern(db.Model):
+    """
+    For a given route, each pair of start and end stops generally has 2 RoutePatterns - one going each direction
+    Requires: route_pattern_id, route_id
+    Relies on: Route, Trip
+    Reference: None
+    """
+    route_pattern_id = db.Column(db.String(64), primary_key=True)
+    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False, index=True)
+    route = db.relationship('Route', backref='patterns')
+    direction_id = db.Column(db.SmallInteger, nullable=True)  # 0 or 1
+    route_pattern_name = db.Column(db.String(128), nullable=True)
+    route_pattern_time_desc = db.Column(db.String(32), nullable=True)
+    route_pattern_typicality = db.Column(db.Integer, nullable=True)
+    route_pattern_sort_order = db.Column(db.Integer, nullable=True)
+    representative_trip_id = db.Column(db.String(128), nullable=True)  # Not a FK because use isn't clear
+
+    def __init__(self, route_pattern_id: str, route_id: str, **kwargs):
+        self.route_pattern_id = route_pattern_id
+        self.route_id = route_id
+
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f'<RoutePattern: {self.route_pattern_id} (Route: {self.route_id})>'
+
+
 class TripAccessibility(enum.Enum):
     type_0 = 'unknown'      # Default when no value given
     type_1 = 'one_or_more'  # One or more bikes or wheelchairs can be accommodated on this trip
@@ -317,7 +345,7 @@ class Trip(db.Model):
     A trip for a route in a transit system. A trip is a sequence
     of two or more stops that occur during a specific time period.
     Requires: route_id, service_id, trip_id
-    Relies on: Route, Calendar, Shape
+    Relies on: Route, Calendar, RoutePattern
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
     """
     trip_id = db.Column(db.String(128), primary_key=True)
@@ -331,6 +359,9 @@ class Trip(db.Model):
     block_id = db.Column(db.String(64), nullable=True)
     shape_id = db.Column(db.String(64), nullable=True)
     wheelchair_accessible = db.Column(db.Enum(TripAccessibility), nullable=True)
+    trip_route_type = db.Column(db.Enum(RouteType), nullable=True)
+    route_pattern_id = db.Column(db.String(64), db.ForeignKey('route_pattern.route_pattern_id'), nullable=True)
+    route_pattern = db.relationship('RoutePattern', backref='trips')
     bikes_allowed = db.Column(db.Enum(TripAccessibility), nullable=True)
 
     def __init__(self, trip_id: str, route_id: str, service_id: str, **kwargs):
@@ -342,4 +373,4 @@ class Trip(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Trip: {self.trip_id} ({self.route_id} @ {self.service_id})>'
+        return f'<Trip: {self.trip_id} (Route: {self.route_id} @ {self.service_id})>'

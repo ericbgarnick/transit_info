@@ -5,7 +5,7 @@ from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
     Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
-    Shape, TripAccessibility, Trip
+    Shape, TripAccessibility, Trip, RoutePattern
 )
 
 
@@ -192,6 +192,29 @@ class ShapeSchema(Schema):
         )
 
 
+class RoutePatternSchema(Schema):
+    route_pattern_id = fields.Str(required=True)
+    route_id = fields.Str(required=True)
+    direction_id = fields.Int()
+    route_pattern_name = fields.Str()
+    route_pattern_time_desc = fields.Str()
+    route_pattern_typicality = fields.Int()
+    route_pattern_sort_order = fields.Int()
+    representative_trip_id = fields.Str()
+
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        return {k: v for k, v in in_data.items() if v}
+
+    @post_load
+    def make_route_pattern(self, data: Dict, **kwargs) -> RoutePattern:
+        return RoutePattern(
+            route_pattern_id=data.pop('route_pattern_id'),
+            route_id=data.pop('route_id'),
+            **data
+        )
+
+
 class TripSchema(Schema):
     route_id = fields.Str(required=True)
     service_id = fields.Str(required=True)
@@ -202,11 +225,14 @@ class TripSchema(Schema):
     block_id = fields.Str()
     shape_id = fields.Str()
     wheelchair_accessible = EnumField(TripAccessibility)
+    trip_route_type = EnumField(RouteType)
+    route_pattern_id = fields.Str()
     bikes_allowed = EnumField(TripAccessibility)
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
         in_data['wheelchair_accessible'] = numbered_type_enum_key(in_data['wheelchair_accessible'], default_0=True)
+        in_data['trip_route_type'] = numbered_type_enum_key(in_data['trip_route_type'])
         in_data['bikes_allowed'] = numbered_type_enum_key(in_data['bikes_allowed'], default_0=True)
         return {k: v for k, v in in_data.items() if v}
 
