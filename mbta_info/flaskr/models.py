@@ -415,6 +415,7 @@ class StopTime(db.Model):
     drop_off_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
     shape_dist_traveled = db.Column(db.Float(), nullable=True)  # Distance traveled from the first stop to this stop
     timepoint = db.Column(db.SmallInteger(), nullable=True)  # 0 = times are approximate, 1 = times are exact
+    checkpoint_id = db.Column(db.String(16), nullable=True)  # References table PK, but not a FK because unknown usage
 
     def __init__(self, trip_id: str, arrival_time: datetime.time, departure_time: datetime.time,
                  stop_id: str, stop_sequence: int, **kwargs):

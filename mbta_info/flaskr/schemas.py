@@ -270,6 +270,7 @@ class StopTimeSchema(Schema):
     drop_off_type = EnumField(PickupDropOffType)
     shape_dist_traveled = fields.Float()
     timepoint = fields.Int()
+    checkpoint_id = fields.Str()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
