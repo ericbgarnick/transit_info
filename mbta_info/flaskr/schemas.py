@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional, Dict
 
 from marshmallow import Schema, fields, pre_load, post_load
@@ -5,7 +6,7 @@ from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
     Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
-    Shape, TripAccessibility, Trip, RoutePattern
+    Shape, TripAccessibility, Trip, RoutePattern, PickupDropOffType, StopTime, Checkpoint
 )
 
 
@@ -246,6 +247,50 @@ class TripSchema(Schema):
         )
 
 
+class CheckpointSchema(Schema):
+    checkpoint_id = fields.Str(required=True)
+    checkpoint_name = fields.Str(required=True)
+
+    @post_load
+    def make_checkpoint(self, data: Dict, **kwargs) -> Checkpoint:
+        return Checkpoint(
+            checkpoint_id=data.pop('checkpoint_id'),
+            checkpoint_name=data.pop('checkpoint_name')
+        )
+
+
+class StopTimeSchema(Schema):
+    trip_id = fields.Str(required=True)
+    arrival_time = fields.Int(required=True)
+    departure_time = fields.Int(required=True)
+    stop_id = fields.Str(required=True)
+    stop_sequence = fields.Int(required=True)
+    stop_headsign = fields.Str()
+    pickup_type = EnumField(PickupDropOffType)
+    drop_off_type = EnumField(PickupDropOffType)
+    shape_dist_traveled = fields.Float()
+    timepoint = fields.Int()
+
+    @pre_load
+    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+        in_data['arrival_time'] = time_as_seconds(in_data['arrival_time'])
+        in_data['departure_time'] = time_as_seconds(in_data['departure_time'])
+        in_data['pickup_type'] = numbered_type_enum_key(in_data['pickup_type'], default_0=True)
+        in_data['drop_off_type'] = numbered_type_enum_key(in_data['drop_off_type'], default_0=True)
+        return {k: v for k, v in in_data.items() if v}
+
+    @post_load
+    def make_stop_time(self, data: Dict, **kwargs) -> StopTime:
+        return StopTime(
+            trip_id=data.pop('trip_id'),
+            arrival_time=data.pop('arrival_time'),
+            departure_time=data.pop('departure_time'),
+            stop_id=data.pop('stop_id'),
+            stop_sequence=data.pop('stop_sequence'),
+            **data
+        )
+
+
 def timezone_enum_key(raw_tz_name: str) -> Optional[str]:
     return raw_tz_name.replace('/', '_') if raw_tz_name else raw_tz_name
 
@@ -254,3 +299,8 @@ def numbered_type_enum_key(numeral: str, default_0: bool = False) -> Optional[st
     if default_0:
         numeral = numeral or '0'
     return 'type_' + numeral if numeral else None
+
+
+def time_as_seconds(time_string) -> int:
+    hours, minutes, seconds = [int(val) for val in time_string.split(':')]
+    return 3600 * hours + 60 * minutes + seconds

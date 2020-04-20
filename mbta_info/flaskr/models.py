@@ -374,3 +374,58 @@ class Trip(db.Model):
 
     def __repr__(self):
         return f'<Trip: {self.trip_id} (Route: {self.route_id} @ {self.service_id})>'
+
+
+class Checkpoint(db.Model):
+    checkpoint_id = db.Column(db.String(16), primary_key=True)
+    checkpoint_name = db.Column(db.String(128), nullable=False)
+
+    def __init__(self, checkpoint_id: str, checkpoint_name: str):
+        self.checkpoint_id = checkpoint_id
+        self.checkpoint_name = checkpoint_name
+
+    def __repr__(self):
+        return f'<Checkpoint: {self.checkpoint_id}>'
+
+
+class PickupDropOffType(enum.Enum):
+    type_0 = 'regularly_scheduled'
+    type_1 = 'none_available'
+    type_2 = 'arrange_with_agency'
+    type_3 = 'arrange_with_driver'
+
+
+class StopTime(db.Model):
+    """
+    Times that a vehicle arrives at and departs from stops for each trip.
+    Requires: trip_id, arrival_time, departure_time, stop_id, stop_sequence
+    Relies on: Trip, Stop
+    Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    trip_id = db.Column(db.String(128), db.ForeignKey('trip.trip_id'), nullable=False)
+    trip = db.relationship('Trip', backref='times')
+    arrival_time = db.Column(db.Integer(), nullable=False)    # Seconds since 00:00:00
+    departure_time = db.Column(db.Integer(), nullable=False)  # Seconds since 00:00:00
+    stop_id = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=False)
+    stop = db.relationship('Stop', backref='times')
+    stop_sequence = db.Column(db.Integer(), nullable=False)
+    stop_headsign = db.Column(db.String(128), nullable=True)
+    pickup_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
+    drop_off_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
+    shape_dist_traveled = db.Column(db.Float(), nullable=True)  # Distance traveled from the first stop to this stop
+    timepoint = db.Column(db.SmallInteger(), nullable=True)  # 0 = times are approximate, 1 = times are exact
+
+    def __init__(self, trip_id: str, arrival_time: datetime.time, departure_time: datetime.time,
+                 stop_id: str, stop_sequence: int, **kwargs):
+        self.trip_id = trip_id
+        self.arrival_time = arrival_time
+        self.departure_time = departure_time
+        self.stop_id = stop_id
+        self.stop_sequence = stop_sequence
+
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f'<StopTime: {self.arrival_time}->{self.departure_time} @ {self.stop_id}>'
