@@ -1,22 +1,26 @@
-import datetime
-from typing import Optional, Dict
+import logging
+from typing import Dict, Optional
 
-from marshmallow import Schema, fields, pre_load, post_load
+from marshmallow import Schema, pre_load, post_load, fields as mm_fields, ValidationError
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
     Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
-    Shape, TripAccessibility, Trip, RoutePattern, PickupDropOffType, StopTime, Checkpoint
+    Shape, TripAccessibility, Trip, RoutePattern, PickupDropOffType, StopTime, Checkpoint, Direction
 )
+from mbta_info.flaskr.schema_utils import time_as_seconds, numbered_type_enum_key, timezone_enum_key
+from mbta_info.flaskr import fields as mbta_fields
+
+logger = logging.getLogger(__name__)
 
 
 class AgencySchema(Schema):
-    agency_id = fields.Int(required=True)
-    agency_name = fields.Str(required=True)
-    agency_url = fields.Url(required=True)
+    agency_id = mm_fields.Int(required=True)
+    agency_name = mm_fields.Str(required=True)
+    agency_url = mm_fields.Url(required=True)
     agency_timezone = EnumField(TimeZone, required=True)
     agency_lang = EnumField(LangCode)
-    agency_phone = fields.Str()
+    agency_phone = mm_fields.Str()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -36,14 +40,14 @@ class AgencySchema(Schema):
 
 
 class LineSchema(Schema):
-    line_id = fields.Str(required=True)
-    line_short_name = fields.Str()
-    line_long_name = fields.Str(required=True)
-    line_desc = fields.Str()
-    line_url = fields.Url()
-    line_color = fields.Str()
-    line_text_color = fields.Str()
-    line_sort_order = fields.Int()
+    line_id = mm_fields.Str(required=True)
+    line_short_name = mm_fields.Str()
+    line_long_name = mm_fields.Str(required=True)
+    line_desc = mm_fields.Str()
+    line_url = mm_fields.Url()
+    line_color = mm_fields.Str()
+    line_text_color = mm_fields.Str()
+    line_sort_order = mm_fields.Int()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -59,18 +63,18 @@ class LineSchema(Schema):
 
 
 class RouteSchema(Schema):
-    route_id = fields.Str(required=True)
-    agency_id = fields.Int(required=True)
-    route_short_name = fields.Str()
-    route_long_name = fields.Str(required=True)
-    route_desc = fields.Str()
+    route_id = mm_fields.Str(required=True)
+    agency_id = mm_fields.Int(required=True)
+    route_short_name = mm_fields.Str()
+    route_long_name = mm_fields.Str(required=True)
+    route_desc = mm_fields.Str()
     route_type = EnumField(RouteType, required=True)
-    route_url = fields.Url()
-    route_color = fields.Str()
-    route_text_color = fields.Str()
-    route_sort_order = fields.Int()
+    route_url = mm_fields.Url()
+    route_color = mm_fields.Str()
+    route_text_color = mm_fields.Str()
+    route_sort_order = mm_fields.Int()
     route_fare_class = EnumField(FareClass)
-    line_id = fields.Str()
+    line_id = mm_fields.Str()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -91,25 +95,25 @@ class RouteSchema(Schema):
 
 
 class StopSchema(Schema):
-    stop_id = fields.Str(required=True)
-    stop_code = fields.Str()
-    stop_name = fields.Str()
-    tts_stop_name = fields.Str()
-    stop_desc = fields.Str()
-    platform_code = fields.Str()
-    platform_name = fields.Str()
-    stop_lat = fields.Float()
-    stop_lon = fields.Float()
-    zone_id = fields.Str()
-    stop_address = fields.Str()
-    stop_url = fields.Url()
-    level_id = fields.Str()
+    stop_id = mm_fields.Str(required=True)
+    stop_code = mm_fields.Str()
+    stop_name = mm_fields.Str()
+    tts_stop_name = mm_fields.Str()
+    stop_desc = mm_fields.Str()
+    platform_code = mm_fields.Str()
+    platform_name = mm_fields.Str()
+    stop_lat = mm_fields.Float()
+    stop_lon = mm_fields.Float()
+    zone_id = mm_fields.Str()
+    stop_address = mm_fields.Str()
+    stop_url = mm_fields.Url()
+    level_id = mm_fields.Str()
     location_type = EnumField(LocationType)
-    parent_station = fields.Str()
+    parent_station = mm_fields.Str()
     wheelchair_boarding = EnumField(AccessibilityType)
-    municipality = fields.Str()
-    on_street = fields.Str()
-    at_street = fields.Str()
+    municipality = mm_fields.Str()
+    on_street = mm_fields.Str()
+    at_street = mm_fields.Str()
     vehicle_type = EnumField(RouteType)
     stop_timezone = EnumField(TimeZone)
 
@@ -138,16 +142,16 @@ class StopSchema(Schema):
 class CalendarSchema(Schema):
     DATE_INPUT_FORMAT = '%Y%m%d'
 
-    service_id = fields.Str(required=True)
-    monday = fields.Bool(required=True)
-    tuesday = fields.Bool(required=True)
-    wednesday = fields.Bool(required=True)
-    thursday = fields.Bool(required=True)
-    friday = fields.Bool(required=True)
-    saturday = fields.Bool(required=True)
-    sunday = fields.Bool(required=True)
-    start_date = fields.Date(format=DATE_INPUT_FORMAT, required=True)
-    end_date = fields.Date(format=DATE_INPUT_FORMAT, required=True)
+    service_id = mm_fields.Str(required=True)
+    monday = mm_fields.Bool(required=True)
+    tuesday = mm_fields.Bool(required=True)
+    wednesday = mm_fields.Bool(required=True)
+    thursday = mm_fields.Bool(required=True)
+    friday = mm_fields.Bool(required=True)
+    saturday = mm_fields.Bool(required=True)
+    sunday = mm_fields.Bool(required=True)
+    start_date = mm_fields.Date(format=DATE_INPUT_FORMAT, required=True)
+    end_date = mm_fields.Date(format=DATE_INPUT_FORMAT, required=True)
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -172,11 +176,11 @@ class CalendarSchema(Schema):
 
 
 class ShapeSchema(Schema):
-    shape_id = fields.Str(required=True)
-    shape_pt_lat = fields.Float(required=True)
-    shape_pt_lon = fields.Float(required=True)
-    shape_pt_sequence = fields.Int(required=True)
-    shape_dist_traveled = fields.Float()
+    shape_id = mm_fields.Str(required=True)
+    shape_pt_lat = mm_fields.Float(required=True)
+    shape_pt_lon = mm_fields.Float(required=True)
+    shape_pt_sequence = mm_fields.Int(required=True)
+    shape_dist_traveled = mm_fields.Float()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -193,15 +197,42 @@ class ShapeSchema(Schema):
         )
 
 
+class DirectionSchema(Schema):
+    route_id = mbta_fields.RouteId(required=True)
+    direction_id = mm_fields.Int(required=True)
+    direction = mm_fields.Str(required=True)
+    direction_destination = mm_fields.Str(required=True)
+
+    def load(self, *args, **kwargs) -> Optional[Direction]:
+        """Load direction data, skipping rows that reference non-existent Routes"""
+        try:
+            return super().load(*args, **kwargs)
+        except ValidationError as ve:
+            if mbta_fields.RouteId.is_missing_route_error(ve):
+                logger.info(ve.normalized_messages())
+                return None
+            else:
+                raise ve
+
+    @post_load
+    def make_direction(self, data: Dict, **kwargs) -> Direction:
+        return Direction(
+            route_id=data.pop('route_id'),
+            direction_id=data.pop('direction_id'),
+            direction=data.pop('direction'),
+            direction_destination=data.pop('direction_destination')
+        )
+
+
 class RoutePatternSchema(Schema):
-    route_pattern_id = fields.Str(required=True)
-    route_id = fields.Str(required=True)
-    direction_id = fields.Int()
-    route_pattern_name = fields.Str()
-    route_pattern_time_desc = fields.Str()
-    route_pattern_typicality = fields.Int()
-    route_pattern_sort_order = fields.Int()
-    representative_trip_id = fields.Str()
+    route_pattern_id = mm_fields.Str(required=True)
+    route_id = mm_fields.Str(required=True)
+    direction_id = mm_fields.Int()
+    route_pattern_name = mm_fields.Str()
+    route_pattern_time_desc = mm_fields.Str()
+    route_pattern_typicality = mm_fields.Int()
+    route_pattern_sort_order = mm_fields.Int()
+    representative_trip_id = mm_fields.Str()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -217,17 +248,17 @@ class RoutePatternSchema(Schema):
 
 
 class TripSchema(Schema):
-    route_id = fields.Str(required=True)
-    service_id = fields.Str(required=True)
-    trip_id = fields.Str(required=True)
-    trip_headsign = fields.Str()
-    trip_short_name = fields.Str()
-    direction_id = fields.Int()
-    block_id = fields.Str()
-    shape_id = fields.Str()
+    route_id = mm_fields.Str(required=True)
+    service_id = mm_fields.Str(required=True)
+    trip_id = mm_fields.Str(required=True)
+    trip_headsign = mm_fields.Str()
+    trip_short_name = mm_fields.Str()
+    direction_id = mm_fields.Int()
+    block_id = mm_fields.Str()
+    shape_id = mm_fields.Str()
     wheelchair_accessible = EnumField(TripAccessibility)
     trip_route_type = EnumField(RouteType)
-    route_pattern_id = fields.Str()
+    route_pattern_id = mm_fields.Str()
     bikes_allowed = EnumField(TripAccessibility)
 
     @pre_load
@@ -248,8 +279,8 @@ class TripSchema(Schema):
 
 
 class CheckpointSchema(Schema):
-    checkpoint_id = fields.Str(required=True)
-    checkpoint_name = fields.Str(required=True)
+    checkpoint_id = mm_fields.Str(required=True)
+    checkpoint_name = mm_fields.Str(required=True)
 
     @post_load
     def make_checkpoint(self, data: Dict, **kwargs) -> Checkpoint:
@@ -260,17 +291,17 @@ class CheckpointSchema(Schema):
 
 
 class StopTimeSchema(Schema):
-    trip_id = fields.Str(required=True)
-    arrival_time = fields.Int(required=True)
-    departure_time = fields.Int(required=True)
-    stop_id = fields.Str(required=True)
-    stop_sequence = fields.Int(required=True)
-    stop_headsign = fields.Str()
+    trip_id = mm_fields.Str(required=True)
+    arrival_time = mm_fields.Int(required=True)
+    departure_time = mm_fields.Int(required=True)
+    stop_id = mm_fields.Str(required=True)
+    stop_sequence = mm_fields.Int(required=True)
+    stop_headsign = mm_fields.Str()
     pickup_type = EnumField(PickupDropOffType)
     drop_off_type = EnumField(PickupDropOffType)
-    shape_dist_traveled = fields.Float()
-    timepoint = fields.Int()
-    checkpoint_id = fields.Str()
+    shape_dist_traveled = mm_fields.Float()
+    timepoint = mm_fields.Int()
+    checkpoint_id = mm_fields.Str()
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
@@ -290,18 +321,3 @@ class StopTimeSchema(Schema):
             stop_sequence=data.pop('stop_sequence'),
             **data
         )
-
-
-def timezone_enum_key(raw_tz_name: str) -> Optional[str]:
-    return raw_tz_name.replace('/', '_') if raw_tz_name else raw_tz_name
-
-
-def numbered_type_enum_key(numeral: str, default_0: bool = False) -> Optional[str]:
-    if default_0:
-        numeral = numeral or '0'
-    return 'type_' + numeral if numeral else None
-
-
-def time_as_seconds(time_string) -> int:
-    hours, minutes, seconds = [int(val) for val in time_string.split(':')]
-    return 3600 * hours + 60 * minutes + seconds

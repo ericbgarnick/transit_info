@@ -8,19 +8,20 @@ from sqlalchemy.exc import DataError
 from mbta_info.flaskr import schemas
 from mbta_info.flaskr.app import db
 
-# DATA_FILES = [
-#     'agency.csv',
-#     'lines.csv',
-#     'routes.csv',
-#     'stops.csv',
-#     'calendar.csv',
-#     'shapes.csv',
-#     'route_patterns.csv',
-#     'trips.csv',
-#     'checkpoints.csv',
-#     'stop_times.csv'
-# ]
-DATA_FILES = ['stop_times.csv']
+DATA_FILES = [
+    'agency.csv',
+    'lines.csv',
+    'routes.csv',
+    'stops.csv',
+    'calendar.csv',
+    'shapes.csv',
+    'route_patterns.csv',
+    'trips.csv',
+    'checkpoints.csv',
+    'stop_times.csv',
+    'directions.csv'
+]
+# DATA_FILES = ['directions.csv']
 
 
 class Loader:
@@ -30,7 +31,7 @@ class Loader:
         self._max_batch_size = max_batch_size
         self._parent_dir = Path(__name__).absolute().parent
 
-    def load_data(self):
+    def load_data(self, skip_missing_fk: bool = False):
         for data_file_name in DATA_FILES:
             data_file_path = Path(self._parent_dir.absolute(), Loader.PROJECT_PATH, data_file_name)
             model_name = create_model_name(data_file_name)
@@ -41,8 +42,9 @@ class Loader:
                 for data_row in reader:
                     try:
                         new_object = model_schema.load(data_row)
-                        db.session.add(new_object)
-                        cur_batch_size += 1
+                        if new_object:
+                            db.session.add(new_object)
+                            cur_batch_size += 1
                     except (ValidationError, KeyError) as e:
                         print(data_row)
                         raise e
@@ -58,8 +60,8 @@ class Loader:
                 # Commit last batch
                 try:
                     db.session.commit()
-                except DataError as e:
-                    print(e)
+                except DataError as de:
+                    print(de)
                     db.session.rollback()
                 finally:
                     db.session.close()

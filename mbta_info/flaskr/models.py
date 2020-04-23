@@ -108,14 +108,7 @@ class Line(db.Model):
         self.line_long_name = long_name
 
         for fieldname, value in kwargs.items():
-            if fieldname != 'routes':
-                setattr(self, fieldname, value)
-
-        # TODO: Is this right?  Seems like it might not be
-        for route in kwargs.get('routes', []):
-            route.line_id = self.line_id
-            db.session.add(route)
-        db.session.commit()
+            setattr(self, fieldname, value)
 
     def __repr__(self):
         return f'<Line: {self.line_id}>'
@@ -304,6 +297,24 @@ class Shape(db.Model, GeoMixin):
     def lonlat_field(self) -> str:
         """Return the name of the field where longitude and latitude are stored"""
         return 'shape_pt_lonlat'
+
+
+class Direction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False)
+    route = db.relationship('Route', backref='directions')
+    direction_id = db.Column(db.SmallInteger, nullable=False)
+    direction = db.Column(db.String(16), nullable=False)
+    direction_destination = db.Column(db.String(64), nullable=False)
+
+    def __init__(self, route_id: str, direction_id: int, direction: str, direction_destination: str, **kwargs):
+        self.route_id = route_id
+        self.direction_id = direction_id
+        self.direction = direction
+        self.direction_destination = direction_destination
+
+    def __repr__(self):
+        return f'<Direction: {self.route_id} ({self.direction} -> {self.direction_destination})>'
 
 
 class RoutePattern(db.Model):
