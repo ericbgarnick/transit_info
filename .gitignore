@@ -1,4 +1,4 @@
 venv
 .idea/
 __pycache__/
-mbta_info/flaskr/data/*
+mbta_info/flaskr/data
