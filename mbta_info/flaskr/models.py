@@ -14,15 +14,23 @@ from mbta_info.flaskr.app import db
 logger = logging.getLogger(__name__)
 
 # noinspection PyTypeChecker
-TimeZone = enum.Enum('TimeZone', {tz.replace('/', '_'): tz for tz in pytz.all_timezones})
+TimeZone = enum.Enum(
+    "TimeZone", {tz.replace("/", "_"): tz for tz in pytz.all_timezones}
+)
 # noinspection PyTypeChecker
-LangCode = enum.Enum('LangCode', {
-    lang.alpha_2: lang.alpha_2 for lang in pycountry.languages if getattr(lang, 'alpha_2', None)
-})
+LangCode = enum.Enum(
+    "LangCode",
+    {
+        lang.alpha_2: lang.alpha_2
+        for lang in pycountry.languages
+        if getattr(lang, "alpha_2", None)
+    },
+)
 
 
 class GeoMixin:
     """A mixin class for models having a Geometry POINT field - allows convenient, cached access to lon/lat values"""
+
     _longitude_cache = None
     _latitude_cache = None
 
@@ -47,11 +55,15 @@ class GeoMixin:
         """
         lonlat_value = getattr(self, self.lonlat_field)
         try:
-            lon, lat = db.session.query(func.ST_X(lonlat_value), func.ST_Y(lonlat_value)).first()
+            lon, lat = db.session.query(
+                func.ST_X(lonlat_value), func.ST_Y(lonlat_value)
+            ).first()
             db.session.close()
             return lon, lat
         except DataError:
-            logger.exception(f"Failed to get lon, lat for Shape {inspect(self).identity[0]}")
+            logger.exception(
+                f"Failed to get lon, lat for Shape {inspect(self).identity[0]}"
+            )
             db.session.close()
 
     @property
@@ -67,6 +79,7 @@ class Agency(db.Model):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#agencytxt
     """
+
     agency_id = db.Column(db.Integer, primary_key=True)
     agency_name = db.Column(db.String(16), nullable=False, unique=True)
     agency_url = db.Column(db.String(64), nullable=False, unique=True)
@@ -74,7 +87,9 @@ class Agency(db.Model):
     agency_lang = db.Column(db.Enum(LangCode), nullable=True)
     agency_phone = db.Column(db.String(16), nullable=True)
 
-    def __init__(self, agency_id: int, name: str, url: str, timezone: TimeZone, **kwargs):
+    def __init__(
+        self, agency_id: int, name: str, url: str, timezone: TimeZone, **kwargs
+    ):
         self.agency_id = agency_id
         self.agency_name = name
         self.agency_url = url
@@ -84,7 +99,7 @@ class Agency(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Agency: {self.agency_id} ({self.agency_name})>'
+        return f"<Agency: {self.agency_id} ({self.agency_name})>"
 
 
 class Line(db.Model):
@@ -94,6 +109,7 @@ class Line(db.Model):
     Relies on: None
     Reference: None
     """
+
     line_id = db.Column(db.String(32), primary_key=True)
     line_short_name = db.Column(db.String(16), nullable=True)
     line_long_name = db.Column(db.String(128), nullable=False)
@@ -111,20 +127,20 @@ class Line(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Line: {self.line_id}>'
+        return f"<Line: {self.line_id}>"
 
 
 class RouteType(enum.Enum):
-    type_0 = 'street_level_rail'
-    type_1 = 'underground_rail'
-    type_2 = 'long_dist_rail'
-    type_3 = 'bus'
-    type_4 = 'ferry'
-    type_5 = 'cable_tram'
-    type_6 = 'suspended'
-    type_7 = 'funicular'
-    type_11 = 'trolleybus'
-    type_12 = 'monorail'
+    type_0 = "street_level_rail"
+    type_1 = "underground_rail"
+    type_2 = "long_dist_rail"
+    type_3 = "bus"
+    type_4 = "ferry"
+    type_5 = "cable_tram"
+    type_6 = "suspended"
+    type_7 = "funicular"
+    type_11 = "trolleybus"
+    type_12 = "monorail"
 
 
 class FareClass(enum.Enum):
@@ -144,9 +160,10 @@ class Route(db.Model):
     Relies on: Agency, Line
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#routestxt
     """
+
     route_id = db.Column(db.String(64), primary_key=True)
-    agency_id = db.Column(db.Integer, db.ForeignKey('agency.agency_id'), nullable=False)
-    agency = db.relationship('Agency', backref='routes')
+    agency_id = db.Column(db.Integer, db.ForeignKey("agency.agency_id"), nullable=False)
+    agency = db.relationship("Agency", backref="routes")
     route_short_name = db.Column(db.String(16), nullable=True)
     route_long_name = db.Column(db.String(128), nullable=False)
     route_desc = db.Column(db.String(32), nullable=True)
@@ -156,10 +173,17 @@ class Route(db.Model):
     route_text_color = db.Column(db.String(8), nullable=True)
     route_sort_order = db.Column(db.Integer, nullable=True)
     route_fare_class = db.Column(db.Enum(FareClass), nullable=True)
-    line_id = db.Column(db.String(32), db.ForeignKey('line.line_id'), nullable=True)
-    line = db.relationship('Line', backref='routes')
+    line_id = db.Column(db.String(32), db.ForeignKey("line.line_id"), nullable=True)
+    line = db.relationship("Line", backref="routes")
 
-    def __init__(self, route_id: str, agency_id: int, long_name: str, route_type: RouteType, **kwargs):
+    def __init__(
+        self,
+        route_id: str,
+        agency_id: int,
+        long_name: str,
+        route_type: RouteType,
+        **kwargs,
+    ):
         self.route_id = route_id
         self.agency_id = agency_id
         self.route_long_name = long_name
@@ -169,21 +193,23 @@ class Route(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Route: {self.route_id}>'
+        return f"<Route: {self.route_id}>"
 
 
 class LocationType(enum.Enum):
-    type_0 = 'stop_or_platform'  # Default when no value given (platform when defined within a parent station)
-    type_1 = 'station'           # A physical structure or area that contains one or more platform
-    type_2 = 'entrance_exit'     # A location where passengers can enter or exit a station from the street
-    type_3 = 'generic_node'      # A location within a station not matching any other LocationType
-    type_4 = 'boarding_area'     # A specific location on a platform where passengers can board and/or alight vehicles
+    type_0 = "stop_or_platform"  # Default when no value given (platform when defined within a parent station)
+    type_1 = (
+        "station"  # A physical structure or area that contains one or more platform
+    )
+    type_2 = "entrance_exit"  # A location where passengers can enter or exit a station from the street
+    type_3 = "generic_node"  # A location within a station not matching any other LocationType
+    type_4 = "boarding_area"  # A specific location on a platform where passengers can board and/or alight vehicles
 
 
 class AccessibilityType(enum.Enum):
-    type_0 = 'unknown_or_inherited'  # Default when no value given.  Inherited when Stop has a parent
-    type_1 = 'limited_or_full'
-    type_2 = 'inaccessible'
+    type_0 = "unknown_or_inherited"  # Default when no value given.  Inherited when Stop has a parent
+    type_1 = "limited_or_full"
+    type_2 = "inaccessible"
 
 
 class Stop(db.Model, GeoMixin):
@@ -193,28 +219,37 @@ class Stop(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stopstxt
     """
+
     stop_id = db.Column(db.String(64), primary_key=True)
-    stop_code = db.Column(db.String(64), nullable=True)  # Often the same as stop_id (or shortened version thereof)
+    stop_code = db.Column(
+        db.String(64), nullable=True
+    )  # Often the same as stop_id (or shortened version thereof)
     stop_name = db.Column(db.String(128), nullable=True)
-    tts_stop_name = db.Column(db.String(64), nullable=True)  # Defaults to stop_name - used to resolve TTS ambiguities
+    tts_stop_name = db.Column(
+        db.String(64), nullable=True
+    )  # Defaults to stop_name - used to resolve TTS ambiguities
     stop_desc = db.Column(db.String(256), nullable=True)
     platform_code = db.Column(db.String(8), nullable=True)
     platform_name = db.Column(db.String(64), nullable=True)
     # to retrieve lon, lat: db.session.query(func.ST_X(Stop.stop_lonlat), func.ST_Y(Stop.stop_lonlat)).first()
-    stop_lonlat = db.Column(Geometry('POINT'), nullable=True, index=True)
+    stop_lonlat = db.Column(Geometry("POINT"), nullable=True, index=True)
     zone_id = db.Column(db.String(32), nullable=True)
     stop_address = db.Column(db.String(128), nullable=True)
     stop_url = db.Column(db.String(64), nullable=True)
     level_id = db.Column(db.String(64), nullable=True)
     location_type = db.Column(db.Enum(LocationType), nullable=True)
-    parent_station = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=True)
-    parent = db.relationship('Stop', backref='children', remote_side=[stop_id])
+    parent_station = db.Column(
+        db.String(64), db.ForeignKey("stop.stop_id"), nullable=True
+    )
+    parent = db.relationship("Stop", backref="children", remote_side=[stop_id])
     wheelchair_boarding = db.Column(db.Enum(AccessibilityType), nullable=True)
     municipality = db.Column(db.String(64), nullable=True)
     on_street = db.Column(db.String(64), nullable=True)
     at_street = db.Column(db.String(64), nullable=True)
     vehicle_type = db.Column(db.Enum(RouteType), nullable=True)
-    stop_timezone = db.Column(db.Enum(TimeZone), nullable=True)  # Inherits from Agency.agency_timezone if null
+    stop_timezone = db.Column(
+        db.Enum(TimeZone), nullable=True
+    )  # Inherits from Agency.agency_timezone if null
 
     def __init__(self, stop_id: str, **kwargs):
         self.stop_id = stop_id
@@ -223,12 +258,12 @@ class Stop(db.Model, GeoMixin):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Stop: {self.stop_id} ({self.stop_name})>'
+        return f"<Stop: {self.stop_id} ({self.stop_name})>"
 
     @property
     def lonlat_field(self) -> str:
         """Return the name of the field where longitude and latitude are stored"""
-        return 'stop_lonlat'
+        return "stop_lonlat"
 
 
 class Calendar(db.Model):
@@ -238,6 +273,7 @@ class Calendar(db.Model):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#calendartxt
     """
+
     service_id = db.Column(db.String(64), primary_key=True)
     monday = db.Column(db.Boolean(), nullable=False)
     tuesday = db.Column(db.Boolean(), nullable=False)
@@ -249,8 +285,19 @@ class Calendar(db.Model):
     start_date = db.Column(db.Date(), nullable=False)
     end_date = db.Column(db.Date(), nullable=False)
 
-    def __init__(self, service_id: str, monday: bool, tuesday: bool, wednesday: bool, thursday: bool,  friday: bool,
-                 saturday: bool, sunday: bool, start_date: datetime.date, end_date: datetime.date):
+    def __init__(
+        self,
+        service_id: str,
+        monday: bool,
+        tuesday: bool,
+        wednesday: bool,
+        thursday: bool,
+        friday: bool,
+        saturday: bool,
+        sunday: bool,
+        start_date: datetime.date,
+        end_date: datetime.date,
+    ):
         self.service_id = service_id
         self.monday = monday
         self.tuesday = tuesday
@@ -263,7 +310,7 @@ class Calendar(db.Model):
         self.end_date = end_date
 
     def __repr__(self):
-        return f'<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>'
+        return f"<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>"
 
 
 class Shape(db.Model, GeoMixin):
@@ -273,48 +320,63 @@ class Shape(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
     """
+
     id = db.Column(db.Integer, primary_key=True)
     shape_id = db.Column(db.String(64), nullable=False, index=True)
-    shape_pt_lonlat = db.Column(Geometry('POINT'), nullable=False)
+    shape_pt_lonlat = db.Column(Geometry("POINT"), nullable=False)
     # Increasing but not necessarily consecutive for each subsequent stop
     shape_pt_sequence = db.Column(db.Integer(), nullable=False)
     shape_dist_traveled = db.Column(db.Float(), nullable=True)
 
-    def __init__(self, shape_id: str, shape_pt_lon: float, shape_pt_lat: float, shape_pt_sequence: int, **kwargs):
+    def __init__(
+        self,
+        shape_id: str,
+        shape_pt_lon: float,
+        shape_pt_lat: float,
+        shape_pt_sequence: int,
+        **kwargs,
+    ):
         self._longitude_cache = shape_pt_lon
         self._latitude_cache = shape_pt_lat
         self.shape_id = shape_id
-        self.shape_pt_lonlat = f'POINT({shape_pt_lon} {shape_pt_lat})'
+        self.shape_pt_lonlat = f"POINT({shape_pt_lon} {shape_pt_lat})"
         self.shape_pt_sequence = shape_pt_sequence
 
         for fieldname, value in kwargs.items():
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Shape: {self.shape_id} @ ({self.longitude}, {self.latitude})>'
+        return f"<Shape: {self.shape_id} @ ({self.longitude}, {self.latitude})>"
 
     @property
     def lonlat_field(self) -> str:
         """Return the name of the field where longitude and latitude are stored"""
-        return 'shape_pt_lonlat'
+        return "shape_pt_lonlat"
 
 
 class Direction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False)
-    route = db.relationship('Route', backref='directions')
+    route_id = db.Column(db.String(64), db.ForeignKey("route.route_id"), nullable=False)
+    route = db.relationship("Route", backref="directions")
     direction_id = db.Column(db.SmallInteger, nullable=False)
     direction = db.Column(db.String(16), nullable=False)
     direction_destination = db.Column(db.String(64), nullable=False)
 
-    def __init__(self, route_id: str, direction_id: int, direction: str, direction_destination: str, **kwargs):
+    def __init__(
+        self,
+        route_id: str,
+        direction_id: int,
+        direction: str,
+        direction_destination: str,
+        **kwargs,
+    ):
         self.route_id = route_id
         self.direction_id = direction_id
         self.direction = direction
         self.direction_destination = direction_destination
 
     def __repr__(self):
-        return f'<Direction: {self.route_id} ({self.direction} -> {self.direction_destination})>'
+        return f"<Direction: {self.route_id} ({self.direction} -> {self.direction_destination})>"
 
 
 class RoutePattern(db.Model):
@@ -324,15 +386,20 @@ class RoutePattern(db.Model):
     Relies on: Route, Trip
     Reference: None
     """
+
     route_pattern_id = db.Column(db.String(64), primary_key=True)
-    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False, index=True)
-    route = db.relationship('Route', backref='patterns')
+    route_id = db.Column(
+        db.String(64), db.ForeignKey("route.route_id"), nullable=False, index=True
+    )
+    route = db.relationship("Route", backref="patterns")
     direction_id = db.Column(db.SmallInteger, nullable=True)  # 0 or 1
     route_pattern_name = db.Column(db.String(128), nullable=True)
     route_pattern_time_desc = db.Column(db.String(32), nullable=True)
     route_pattern_typicality = db.Column(db.Integer, nullable=True)
     route_pattern_sort_order = db.Column(db.Integer, nullable=True)
-    representative_trip_id = db.Column(db.String(128), nullable=True)  # Not a FK because use isn't clear
+    representative_trip_id = db.Column(
+        db.String(128), nullable=True
+    )  # Not a FK because use isn't clear
 
     def __init__(self, route_pattern_id: str, route_id: str, **kwargs):
         self.route_pattern_id = route_pattern_id
@@ -342,13 +409,13 @@ class RoutePattern(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<RoutePattern: {self.route_pattern_id} (Route: {self.route_id})>'
+        return f"<RoutePattern: {self.route_pattern_id} (Route: {self.route_id})>"
 
 
 class TripAccessibility(enum.Enum):
-    type_0 = 'unknown'      # Default when no value given
-    type_1 = 'one_or_more'  # One or more bikes or wheelchairs can be accommodated on this trip
-    type_2 = 'none'         # No bikes or wheelchairs can be accommodated on this trip
+    type_0 = "unknown"  # Default when no value given
+    type_1 = "one_or_more"  # One or more bikes or wheelchairs can be accommodated on this trip
+    type_2 = "none"  # No bikes or wheelchairs can be accommodated on this trip
 
 
 class Trip(db.Model):
@@ -359,11 +426,16 @@ class Trip(db.Model):
     Relies on: Route, Calendar, RoutePattern
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt
     """
+
     trip_id = db.Column(db.String(128), primary_key=True)
-    route_id = db.Column(db.String(64), db.ForeignKey('route.route_id'), nullable=False, index=True)
-    route = db.relationship('Route', backref='trips')
-    service_id = db.Column(db.String(64), db.ForeignKey('calendar.service_id'), nullable=False, index=True)
-    service = db.relationship('Calendar', backref='trips')
+    route_id = db.Column(
+        db.String(64), db.ForeignKey("route.route_id"), nullable=False, index=True
+    )
+    route = db.relationship("Route", backref="trips")
+    service_id = db.Column(
+        db.String(64), db.ForeignKey("calendar.service_id"), nullable=False, index=True
+    )
+    service = db.relationship("Calendar", backref="trips")
     trip_headsign = db.Column(db.String(128), nullable=True)
     trip_short_name = db.Column(db.String(16), nullable=True)
     direction_id = db.Column(db.SmallInteger(), nullable=True)  # 0 or 1
@@ -371,8 +443,10 @@ class Trip(db.Model):
     shape_id = db.Column(db.String(64), nullable=True)
     wheelchair_accessible = db.Column(db.Enum(TripAccessibility), nullable=True)
     trip_route_type = db.Column(db.Enum(RouteType), nullable=True)
-    route_pattern_id = db.Column(db.String(64), db.ForeignKey('route_pattern.route_pattern_id'), nullable=True)
-    route_pattern = db.relationship('RoutePattern', backref='trips')
+    route_pattern_id = db.Column(
+        db.String(64), db.ForeignKey("route_pattern.route_pattern_id"), nullable=True
+    )
+    route_pattern = db.relationship("RoutePattern", backref="trips")
     bikes_allowed = db.Column(db.Enum(TripAccessibility), nullable=True)
 
     def __init__(self, trip_id: str, route_id: str, service_id: str, **kwargs):
@@ -384,7 +458,7 @@ class Trip(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<Trip: {self.trip_id} (Route: {self.route_id} @ {self.service_id})>'
+        return f"<Trip: {self.trip_id} (Route: {self.route_id} @ {self.service_id})>"
 
 
 class Checkpoint(db.Model):
@@ -396,14 +470,14 @@ class Checkpoint(db.Model):
         self.checkpoint_name = checkpoint_name
 
     def __repr__(self):
-        return f'<Checkpoint: {self.checkpoint_id}>'
+        return f"<Checkpoint: {self.checkpoint_id}>"
 
 
 class PickupDropOffType(enum.Enum):
-    type_0 = 'regularly_scheduled'
-    type_1 = 'none_available'
-    type_2 = 'arrange_with_agency'
-    type_3 = 'arrange_with_driver'
+    type_0 = "regularly_scheduled"
+    type_1 = "none_available"
+    type_2 = "arrange_with_agency"
+    type_3 = "arrange_with_driver"
 
 
 class StopTime(db.Model):
@@ -413,23 +487,37 @@ class StopTime(db.Model):
     Relies on: Trip, Stop
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt
     """
+
     id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.String(128), db.ForeignKey('trip.trip_id'), nullable=False)
-    trip = db.relationship('Trip', backref='times')
-    arrival_time = db.Column(db.Integer(), nullable=False)    # Seconds since 00:00:00
+    trip_id = db.Column(db.String(128), db.ForeignKey("trip.trip_id"), nullable=False)
+    trip = db.relationship("Trip", backref="times")
+    arrival_time = db.Column(db.Integer(), nullable=False)  # Seconds since 00:00:00
     departure_time = db.Column(db.Integer(), nullable=False)  # Seconds since 00:00:00
-    stop_id = db.Column(db.String(64), db.ForeignKey('stop.stop_id'), nullable=False)
-    stop = db.relationship('Stop', backref='times')
+    stop_id = db.Column(db.String(64), db.ForeignKey("stop.stop_id"), nullable=False)
+    stop = db.relationship("Stop", backref="times")
     stop_sequence = db.Column(db.Integer(), nullable=False)
     stop_headsign = db.Column(db.String(128), nullable=True)
     pickup_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
     drop_off_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
-    shape_dist_traveled = db.Column(db.Float(), nullable=True)  # Distance traveled from the first stop to this stop
-    timepoint = db.Column(db.SmallInteger(), nullable=True)  # 0 = times are approximate, 1 = times are exact
-    checkpoint_id = db.Column(db.String(16), nullable=True)  # References table PK, but not a FK because unknown usage
+    shape_dist_traveled = db.Column(
+        db.Float(), nullable=True
+    )  # Distance traveled from the first stop to this stop
+    timepoint = db.Column(
+        db.SmallInteger(), nullable=True
+    )  # 0 = times are approximate, 1 = times are exact
+    checkpoint_id = db.Column(
+        db.String(16), nullable=True
+    )  # References table PK, but not a FK because unknown usage
 
-    def __init__(self, trip_id: str, arrival_time: datetime.time, departure_time: datetime.time,
-                 stop_id: str, stop_sequence: int, **kwargs):
+    def __init__(
+        self,
+        trip_id: str,
+        arrival_time: datetime.time,
+        departure_time: datetime.time,
+        stop_id: str,
+        stop_sequence: int,
+        **kwargs,
+    ):
         self.trip_id = trip_id
         self.arrival_time = arrival_time
         self.departure_time = departure_time
@@ -440,4 +528,6 @@ class StopTime(db.Model):
             setattr(self, fieldname, value)
 
     def __repr__(self):
-        return f'<StopTime: {self.arrival_time}->{self.departure_time} @ {self.stop_id}>'
+        return (
+            f"<StopTime: {self.arrival_time}->{self.departure_time} @ {self.stop_id}>"
+        )

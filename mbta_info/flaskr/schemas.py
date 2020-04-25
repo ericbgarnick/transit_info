@@ -1,14 +1,41 @@
 import logging
 from typing import Dict, Optional
 
-from marshmallow import Schema, pre_load, post_load, fields as mm_fields, ValidationError
+from marshmallow import (
+    Schema,
+    pre_load,
+    post_load,
+    fields as mm_fields,
+    ValidationError,
+)
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr.models import (
-    Agency, Line, Route, TimeZone, LangCode, RouteType, FareClass, LocationType, AccessibilityType, Stop, Calendar,
-    Shape, TripAccessibility, Trip, RoutePattern, PickupDropOffType, StopTime, Checkpoint, Direction
+    Agency,
+    Line,
+    Route,
+    TimeZone,
+    LangCode,
+    RouteType,
+    FareClass,
+    LocationType,
+    AccessibilityType,
+    Stop,
+    Calendar,
+    Shape,
+    TripAccessibility,
+    Trip,
+    RoutePattern,
+    PickupDropOffType,
+    StopTime,
+    Checkpoint,
+    Direction,
 )
-from mbta_info.flaskr.schema_utils import time_as_seconds, numbered_type_enum_key, timezone_enum_key
+from mbta_info.flaskr.schema_utils import (
+    time_as_seconds,
+    numbered_type_enum_key,
+    timezone_enum_key,
+)
 from mbta_info.flaskr import fields as mbta_fields
 
 logger = logging.getLogger(__name__)
@@ -24,18 +51,18 @@ class AgencySchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        in_data['agency_timezone'] = timezone_enum_key(in_data['agency_timezone'])
-        in_data['agency_lang'] = in_data.get('agency_lang', '').lower()
+        in_data["agency_timezone"] = timezone_enum_key(in_data["agency_timezone"])
+        in_data["agency_lang"] = in_data.get("agency_lang", "").lower()
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_agency(self, data: Dict, **kwargs) -> Agency:
         return Agency(
-            data.pop('agency_id'),
-            data.pop('agency_name'),
-            data.pop('agency_url'),
-            data.pop('agency_timezone'),
-            **data
+            data.pop("agency_id"),
+            data.pop("agency_name"),
+            data.pop("agency_url"),
+            data.pop("agency_timezone"),
+            **data,
         )
 
 
@@ -55,11 +82,7 @@ class LineSchema(Schema):
 
     @post_load
     def make_line(self, data: Dict, **kwargs) -> Line:
-        return Line(
-            data.pop('line_id'),
-            data.pop('line_long_name'),
-            **data
-        )
+        return Line(data.pop("line_id"), data.pop("line_long_name"), **data)
 
 
 class RouteSchema(Schema):
@@ -78,19 +101,21 @@ class RouteSchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        in_data.pop('listed_route', None)
-        in_data['route_fare_class'] = in_data['route_fare_class'].replace(' ', '_').lower()
-        in_data['route_type'] = numbered_type_enum_key(in_data['route_type'])
+        in_data.pop("listed_route", None)
+        in_data["route_fare_class"] = (
+            in_data["route_fare_class"].replace(" ", "_").lower()
+        )
+        in_data["route_type"] = numbered_type_enum_key(in_data["route_type"])
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_route(self, data: Dict, **kwargs) -> Route:
         return Route(
-            data.pop('route_id'),
-            data.pop('agency_id'),
-            data.pop('route_long_name'),
-            data.pop('route_type'),
-            **data
+            data.pop("route_id"),
+            data.pop("agency_id"),
+            data.pop("route_long_name"),
+            data.pop("route_type"),
+            **data,
         )
 
 
@@ -119,28 +144,29 @@ class StopSchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        in_data['location_type'] = numbered_type_enum_key(in_data['location_type'], default_0=True)
-        in_data['wheelchair_boarding'] = numbered_type_enum_key(in_data['wheelchair_boarding'], default_0=True)
-        in_data['vehicle_type'] = numbered_type_enum_key(in_data['vehicle_type'])
-        in_data['stop_timezone'] = timezone_enum_key(in_data.get('stop_timezone'))
+        in_data["location_type"] = numbered_type_enum_key(
+            in_data["location_type"], default_0=True
+        )
+        in_data["wheelchair_boarding"] = numbered_type_enum_key(
+            in_data["wheelchair_boarding"], default_0=True
+        )
+        in_data["vehicle_type"] = numbered_type_enum_key(in_data["vehicle_type"])
+        in_data["stop_timezone"] = timezone_enum_key(in_data.get("stop_timezone"))
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_stop(self, data: Dict, **kwargs) -> Stop:
         try:
-            lon = data.pop('stop_lon')
-            lat = data.pop('stop_lat')
-            data['stop_lonlat'] = f'POINT({lon} {lat})'
+            lon = data.pop("stop_lon")
+            lat = data.pop("stop_lat")
+            data["stop_lonlat"] = f"POINT({lon} {lat})"
         except KeyError:
             pass
-        return Stop(
-            data.pop('stop_id'),
-            **data
-        )
+        return Stop(data.pop("stop_id"), **data)
 
 
 class CalendarSchema(Schema):
-    DATE_INPUT_FORMAT = '%Y%m%d'
+    DATE_INPUT_FORMAT = "%Y%m%d"
 
     service_id = mm_fields.Str(required=True)
     monday = mm_fields.Bool(required=True)
@@ -155,23 +181,31 @@ class CalendarSchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+        for day in [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]:
             in_data[day] = bool(int(in_data[day]))
         return in_data
 
     @post_load
     def make_calendar(self, data: Dict, **kwargs) -> Calendar:
         return Calendar(
-            data.pop('service_id'),
-            data.pop('monday'),
-            data.pop('tuesday'),
-            data.pop('wednesday'),
-            data.pop('thursday'),
-            data.pop('friday'),
-            data.pop('saturday'),
-            data.pop('sunday'),
-            data.pop('start_date'),
-            data.pop('end_date'),
+            data.pop("service_id"),
+            data.pop("monday"),
+            data.pop("tuesday"),
+            data.pop("wednesday"),
+            data.pop("thursday"),
+            data.pop("friday"),
+            data.pop("saturday"),
+            data.pop("sunday"),
+            data.pop("start_date"),
+            data.pop("end_date"),
         )
 
 
@@ -189,11 +223,11 @@ class ShapeSchema(Schema):
     @post_load
     def make_shape(self, data: Dict, **kwargs) -> Shape:
         return Shape(
-            data.pop('shape_id'),
-            data.pop('shape_pt_lon'),
-            data.pop('shape_pt_lat'),
-            data.pop('shape_pt_sequence'),
-            **data
+            data.pop("shape_id"),
+            data.pop("shape_pt_lon"),
+            data.pop("shape_pt_lat"),
+            data.pop("shape_pt_sequence"),
+            **data,
         )
 
 
@@ -217,10 +251,10 @@ class DirectionSchema(Schema):
     @post_load
     def make_direction(self, data: Dict, **kwargs) -> Direction:
         return Direction(
-            route_id=data.pop('route_id'),
-            direction_id=data.pop('direction_id'),
-            direction=data.pop('direction'),
-            direction_destination=data.pop('direction_destination')
+            route_id=data.pop("route_id"),
+            direction_id=data.pop("direction_id"),
+            direction=data.pop("direction"),
+            direction_destination=data.pop("direction_destination"),
         )
 
 
@@ -241,9 +275,9 @@ class RoutePatternSchema(Schema):
     @post_load
     def make_route_pattern(self, data: Dict, **kwargs) -> RoutePattern:
         return RoutePattern(
-            route_pattern_id=data.pop('route_pattern_id'),
-            route_id=data.pop('route_id'),
-            **data
+            route_pattern_id=data.pop("route_pattern_id"),
+            route_id=data.pop("route_id"),
+            **data,
         )
 
 
@@ -263,18 +297,22 @@ class TripSchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        in_data['wheelchair_accessible'] = numbered_type_enum_key(in_data['wheelchair_accessible'], default_0=True)
-        in_data['trip_route_type'] = numbered_type_enum_key(in_data['trip_route_type'])
-        in_data['bikes_allowed'] = numbered_type_enum_key(in_data['bikes_allowed'], default_0=True)
+        in_data["wheelchair_accessible"] = numbered_type_enum_key(
+            in_data["wheelchair_accessible"], default_0=True
+        )
+        in_data["trip_route_type"] = numbered_type_enum_key(in_data["trip_route_type"])
+        in_data["bikes_allowed"] = numbered_type_enum_key(
+            in_data["bikes_allowed"], default_0=True
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_trip(self, data: Dict, **kwargs) -> Trip:
         return Trip(
-            trip_id=data.pop('trip_id'),
-            route_id=data.pop('route_id'),
-            service_id=data.pop('service_id'),
-            **data
+            trip_id=data.pop("trip_id"),
+            route_id=data.pop("route_id"),
+            service_id=data.pop("service_id"),
+            **data,
         )
 
 
@@ -285,8 +323,8 @@ class CheckpointSchema(Schema):
     @post_load
     def make_checkpoint(self, data: Dict, **kwargs) -> Checkpoint:
         return Checkpoint(
-            checkpoint_id=data.pop('checkpoint_id'),
-            checkpoint_name=data.pop('checkpoint_name')
+            checkpoint_id=data.pop("checkpoint_id"),
+            checkpoint_name=data.pop("checkpoint_name"),
         )
 
 
@@ -305,19 +343,23 @@ class StopTimeSchema(Schema):
 
     @pre_load
     def convert_input(self, in_data: Dict, **kwargs) -> Dict:
-        in_data['arrival_time'] = time_as_seconds(in_data['arrival_time'])
-        in_data['departure_time'] = time_as_seconds(in_data['departure_time'])
-        in_data['pickup_type'] = numbered_type_enum_key(in_data['pickup_type'], default_0=True)
-        in_data['drop_off_type'] = numbered_type_enum_key(in_data['drop_off_type'], default_0=True)
+        in_data["arrival_time"] = time_as_seconds(in_data["arrival_time"])
+        in_data["departure_time"] = time_as_seconds(in_data["departure_time"])
+        in_data["pickup_type"] = numbered_type_enum_key(
+            in_data["pickup_type"], default_0=True
+        )
+        in_data["drop_off_type"] = numbered_type_enum_key(
+            in_data["drop_off_type"], default_0=True
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @post_load
     def make_stop_time(self, data: Dict, **kwargs) -> StopTime:
         return StopTime(
-            trip_id=data.pop('trip_id'),
-            arrival_time=data.pop('arrival_time'),
-            departure_time=data.pop('departure_time'),
-            stop_id=data.pop('stop_id'),
-            stop_sequence=data.pop('stop_sequence'),
-            **data
+            trip_id=data.pop("trip_id"),
+            arrival_time=data.pop("arrival_time"),
+            departure_time=data.pop("departure_time"),
+            stop_id=data.pop("stop_id"),
+            stop_sequence=data.pop("stop_sequence"),
+            **data,
         )
