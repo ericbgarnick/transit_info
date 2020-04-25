@@ -1,13 +1,14 @@
 import csv
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Set, Union
 
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
+from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr import schemas
+from mbta_info.flaskr import schemas, models
 
 DATA_FILES = [
     "agency.csv",
@@ -40,13 +41,19 @@ class Loader:
                 self._parent_dir.absolute(), Loader.PROJECT_PATH, data_file_name
             )
             model_name = create_model_name(data_file_name)
+            model = getattr(models, model_name)
+            model_pk_field = inspect(model).primary_key[0].name
+            existing_pks = {
+                tup[0]
+                for tup in self.db.session.query(getattr(model, model_pk_field)).all()
+            }
             model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
             with open(data_file_path, "r") as f_in:
                 reader = csv.DictReader(f_in)
                 cur_batch_size = 0
                 for data_row in reader:
                     cur_batch_size += self._update_or_create_object(
-                        model_schema, data_row
+                        model, model_schema, model_pk_field, existing_pks, data_row
                     )
                     if cur_batch_size == self._max_batch_size:
                         self._commit_batch()
@@ -55,11 +62,30 @@ class Loader:
                 # Commit last batch
                 self._commit_batch(last_batch=True)
 
-    def _update_or_create_object(self, model_schema: Schema, data_row: Dict) -> int:
+    def _update_or_create_object(
+        self,
+        model: Model,
+        model_schema: Schema,
+        model_pk_field: str,
+        existing_pks: Set[Union[str, int]],
+        data_row: Dict,
+    ) -> int:
         try:
-            new_object = model_schema.load(data_row)
-            if new_object:
-                self.db.session.add(new_object)
+            model_instance = model_schema.load(data_row)
+            if model_instance:
+                instance_pk = getattr(model_instance, model_pk_field)
+                if instance_pk in existing_pks:
+                    # Update existing
+                    instance_dict = (
+                        model_instance.__dict__
+                    )  # Some values must be converted from data_row format
+                    instance_dict.pop("_sa_instance_state", None)
+                    self.db.session.query(model).filter(
+                        getattr(model, model_pk_field) == instance_pk
+                    ).update(instance_dict)
+                else:
+                    # Create new
+                    self.db.session.add(model_instance)
                 return 1
             return 0
         except (ValidationError, KeyError) as e:
