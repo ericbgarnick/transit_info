@@ -70,6 +70,8 @@ class Loader:
         existing_pks: Set[Union[str, int]],
         data_row: Dict,
     ) -> int:
+        """Update or create a database entry, returning 1 for if
+        the data_row was successfully processed, 0 if skipped"""
         try:
             model_instance = model_schema.load(data_row)
             if model_instance:
