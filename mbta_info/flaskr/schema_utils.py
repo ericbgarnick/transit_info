@@ -13,6 +13,6 @@ def numbered_type_enum_key(numeral: Optional[str], default_0: bool = False) -> O
     return "type_" + numeral if numeral else None
 
 
-def time_as_seconds(time_string) -> int:
+def time_as_seconds(time_string: str) -> int:
     hours, minutes, seconds = [int(val) for val in time_string.split(":")]
     return 3600 * hours + 60 * minutes + seconds
