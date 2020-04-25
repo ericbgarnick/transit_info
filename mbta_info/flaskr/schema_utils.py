@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-def timezone_enum_key(raw_tz_name: str) -> Optional[str]:
+def timezone_enum_key(raw_tz_name: Optional[str]) -> Optional[str]:
     return raw_tz_name.replace("/", "_") if raw_tz_name else raw_tz_name
 
 
