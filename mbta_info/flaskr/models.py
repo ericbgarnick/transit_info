@@ -30,8 +30,8 @@ class GeoMixin:
     """A mixin class for models having a Geometry POINT field - allows convenient, cached access to lon/lat values"""
 
     lonlat_field: ClassVar[str]
-    _longitude_cache = None
-    _latitude_cache = None
+    _longitude_cache: Optional[float] = None
+    _latitude_cache: Optional[float] = None
 
     @property
     def longitude(self) -> Optional[float]:
@@ -57,13 +57,13 @@ class GeoMixin:
             lon, lat = db.session.query(
                 func.ST_X(lonlat_value), func.ST_Y(lonlat_value)
             ).first()
-            db.session.close()
         except DataError:
             logger.exception(
                 f"Failed to get lon, lat for Shape {inspect(self).identity[0]}"
             )
-            db.session.close()
             lon, lat = None, None
+        finally:
+            db.session.close()
         return lon, lat
 
 
@@ -214,6 +214,7 @@ class Stop(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stopstxt
     """
+
     lonlat_field = "stop_lonlat"
 
     stop_id = db.Column(db.String(64), primary_key=True)
@@ -311,6 +312,7 @@ class Shape(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
     """
+
     lonlat_field = "shape_pt_lonlat"
 
     id = db.Column(db.Integer, primary_key=True)
