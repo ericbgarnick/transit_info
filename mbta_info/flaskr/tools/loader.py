@@ -8,21 +8,9 @@ from marshmallow import Schema, ValidationError
 from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr import schemas, models
+from mbta_info.flaskr import schemas, models, app
 
-DATA_FILES = [
-    "agency.csv",
-    "lines.csv",
-    "routes.csv",
-    "stops.csv",
-    "calendar.csv",
-    "shapes.csv",
-    "route_patterns.csv",
-    "trips.csv",
-    "checkpoints.csv",
-    "stop_times.csv",
-    "directions.csv",
-]
+DATA_FILES = app.config['mbta_data']['files']
 
 
 class Loader:

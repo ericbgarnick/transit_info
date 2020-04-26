@@ -1,0 +1,25 @@
+
+
+
+
+flask:
+  SQLALCHEMY_DATABASE_URI: "postgresql://eric:password@localhost/mydb"
+  SQLALCHEMY_TRACK_MODIFICATIONS: false
+
+
+mbta_data:
+  files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
+  files:
+    - "agency.txt"
+    - "calendar.txt"
+    - "checkpoints.txt"
+    - "directions.txt"
+    - "lines.txt"
+    - "route_patterns.txt"
+    - "routes.txt"
+    - "shapes.txt"
+    - "stop_lines.txt"
+    - "stops.txt"
+    - "trips.txt"
+
+
