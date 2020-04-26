@@ -357,7 +357,6 @@ class Direction(db.Model):
         direction_id: int,
         direction: str,
         direction_destination: str,
-        **kwargs,
     ):
         self.route_id = route_id
         self.direction_id = direction_id
