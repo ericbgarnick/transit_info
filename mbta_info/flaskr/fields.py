@@ -20,8 +20,6 @@ class RouteId(String):
         self.error_messages["missing_route"] = self.MISSING_ROUTE_MESSAGE
 
     def _deserialize(self, value, attr, data, **kwargs) -> typing.Optional[str]:
-        if not isinstance(value, (str, bytes)):
-            raise self.make_error("invalid")
         if Route.query.filter_by(route_id=value).count():
             return value
         elif not Route.query.count():

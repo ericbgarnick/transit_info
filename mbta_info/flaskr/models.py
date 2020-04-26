@@ -1,7 +1,7 @@
 import datetime
 import enum
 import logging
-from typing import Tuple, Optional
+from typing import Tuple, Optional, ClassVar, Union
 
 import pycountry
 import pytz
@@ -13,12 +13,10 @@ from mbta_info.flaskr.app import db
 
 logger = logging.getLogger(__name__)
 
-# noinspection PyTypeChecker
-TimeZone = enum.Enum(
+TimeZone = enum.Enum(  # type: ignore
     "TimeZone", {tz.replace("/", "_"): tz for tz in pytz.all_timezones}
 )
-# noinspection PyTypeChecker
-LangCode = enum.Enum(
+LangCode = enum.Enum(  # type: ignore
     "LangCode",
     {
         lang.alpha_2: lang.alpha_2
@@ -31,23 +29,24 @@ LangCode = enum.Enum(
 class GeoMixin:
     """A mixin class for models having a Geometry POINT field - allows convenient, cached access to lon/lat values"""
 
+    lonlat_field: ClassVar[str]
     _longitude_cache = None
     _latitude_cache = None
 
     @property
-    def longitude(self) -> float:
+    def longitude(self) -> Optional[float]:
         if self._longitude_cache is None:
             self._longitude_cache, self._latitude_cache = self.lonlat
         return self._longitude_cache
 
     @property
-    def latitude(self) -> float:
+    def latitude(self) -> Optional[float]:
         if self._latitude_cache is None:
             self._longitude_cache, self._latitude_cache = self.lonlat
         return self._latitude_cache
 
     @property
-    def lonlat(self) -> Optional[Tuple[float, float]]:
+    def lonlat(self) -> Union[Tuple[None, None], Tuple[float, float]]:
         """
         Return a tuple of (lon, lat) or return None and log exception if no coordinates can be retrieved.
 
@@ -59,17 +58,13 @@ class GeoMixin:
                 func.ST_X(lonlat_value), func.ST_Y(lonlat_value)
             ).first()
             db.session.close()
-            return lon, lat
         except DataError:
             logger.exception(
                 f"Failed to get lon, lat for Shape {inspect(self).identity[0]}"
             )
             db.session.close()
-
-    @property
-    def lonlat_field(self) -> str:
-        """Return the name of the field where longitude and latitude are stored"""
-        raise NotImplementedError
+            lon, lat = None, None
+        return lon, lat
 
 
 class Agency(db.Model):
@@ -219,6 +214,7 @@ class Stop(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stopstxt
     """
+    lonlat_field = "stop_lonlat"
 
     stop_id = db.Column(db.String(64), primary_key=True)
     stop_code = db.Column(
@@ -259,11 +255,6 @@ class Stop(db.Model, GeoMixin):
 
     def __repr__(self):
         return f"<Stop: {self.stop_id} ({self.stop_name})>"
-
-    @property
-    def lonlat_field(self) -> str:
-        """Return the name of the field where longitude and latitude are stored"""
-        return "stop_lonlat"
 
 
 class Calendar(db.Model):
@@ -320,6 +311,7 @@ class Shape(db.Model, GeoMixin):
     Relies on: None
     Reference: https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
     """
+    lonlat_field = "shape_pt_lonlat"
 
     id = db.Column(db.Integer, primary_key=True)
     shape_id = db.Column(db.String(64), nullable=False, index=True)
@@ -347,11 +339,6 @@ class Shape(db.Model, GeoMixin):
 
     def __repr__(self):
         return f"<Shape: {self.shape_id} @ ({self.longitude}, {self.latitude})>"
-
-    @property
-    def lonlat_field(self) -> str:
-        """Return the name of the field where longitude and latitude are stored"""
-        return "shape_pt_lonlat"
 
 
 class Direction(db.Model):
