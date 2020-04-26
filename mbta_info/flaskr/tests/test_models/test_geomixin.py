@@ -7,7 +7,7 @@ from mbta_info.flaskr.app import db
 
 
 class GeoStub(db.Model, GeoMixin):
-    lonlat_field = 'lonlat_column'
+    lonlat_field = "lonlat_column"
 
     lonlat_column = db.Column(Geometry("POINT"), primary_key=True)
 
@@ -21,7 +21,7 @@ def test_lonlat_from_cache(monkeypatch):
     longitude = 1.0
     latitude = 2.0
 
-    monkeypatch.setattr(GeoMixin, 'lonlat', ("no_cache", "no_cache"))
+    monkeypatch.setattr(GeoMixin, "lonlat", ("no_cache", "no_cache"))
 
     geomixin = GeoMixin()
     geomixin._longitude_cache = longitude

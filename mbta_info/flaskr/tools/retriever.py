@@ -7,13 +7,16 @@ import requests
 
 from mbta_info.flaskr import app
 
-DATA_PATH = Path(Path(__name__).absolute().parent, app.config['mbta_data']['path'].get())
+DATA_PATH = Path(
+    Path(__name__).absolute().parent, app.config["mbta_data"]["path"].get()
+)
 
 
 class Retriever:
     """Retrieve GTFS data files"""
+
     def __init__(self):
-        self.data_url: str = app.config['mbta_data']['files_url'].get()
+        self.data_url: str = app.config["mbta_data"]["files_url"].get()
         self.errors = []
         self.missing_filenames: Set[str] = set()
 
@@ -27,7 +30,9 @@ class Retriever:
 
     def _fetch_zipfile(self) -> zipfile.ZipFile:
         try:
-            response = requests.get(self.data_url, timeout=(3.1, 6.2))  # (connect, read)
+            response = requests.get(
+                self.data_url, timeout=(3.1, 6.2)
+            )  # (connect, read)
             compressed_data = io.BytesIO(response.content)
             return zipfile.ZipFile(compressed_data)
         except requests.exceptions.ConnectionError:
@@ -35,7 +40,7 @@ class Retriever:
 
     def _validate_zipfile_contents(self, zf: zipfile.ZipFile):
         retrieved_filenames = set(zf.namelist())
-        for filename in app.config['mbta_data']['files'].get():
+        for filename in app.config["mbta_data"]["files"].get():
             if filename not in retrieved_filenames:
                 self.missing_filenames.add(filename)
         if self.missing_filenames:

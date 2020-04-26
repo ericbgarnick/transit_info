@@ -10,8 +10,10 @@ from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr import schemas, models, app
 
-DATA_FILES = app.config['mbta_data']['files'].get()
-DATA_PATH = Path(Path(__name__).absolute().parent, app.config['mbta_data']['path'].get())
+DATA_FILES = app.config["mbta_data"]["files"].get()
+DATA_PATH = Path(
+    Path(__name__).absolute().parent, app.config["mbta_data"]["path"].get()
+)
 
 
 class Loader:
@@ -22,6 +24,7 @@ class Loader:
 
     def load_data(self, data_files: List[str] = DATA_FILES):
         import pdb
+
         pdb.set_trace()
         for data_file_name in data_files:
             print(f"Loading data from {data_file_name}")
@@ -31,7 +34,10 @@ class Loader:
             model = getattr(models, model_name)
 
             model_pk_field = inspect(model).primary_key[0].name
-            existing_pks = {tup[0] for tup in self.db.session.query(getattr(model, model_pk_field)).all()}
+            existing_pks = {
+                tup[0]
+                for tup in self.db.session.query(getattr(model, model_pk_field)).all()
+            }
 
             data_file_path = Path(DATA_PATH, data_file_name)
             with open(data_file_path, "r") as f_in:
