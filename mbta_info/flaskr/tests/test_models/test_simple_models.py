@@ -1,6 +1,6 @@
 import pytest
 
-from mbta_info.flaskr.models import TimeZone, Agency, Line
+from mbta_info.flaskr.models import TimeZone, Agency, Line, Route, RouteType, FareClass
 
 
 @pytest.mark.parametrize(
@@ -10,7 +10,7 @@ from mbta_info.flaskr.models import TimeZone, Agency, Line
             "agency_id": 1,
             "agency_name": "agency",
             "agency_url": "http://www.agency.com",
-            "agency_timezone": TimeZone.America_New_York.value,
+            "agency_timezone": TimeZone.America_New_York,  # type: ignore[attr-defined]
             "agency_lang": "en",
             "agency_phone": "111-222-3333"
         },
@@ -18,7 +18,7 @@ from mbta_info.flaskr.models import TimeZone, Agency, Line
             "agency_id": 1,
             "agency_name": "agency",
             "agency_url": "http://www.agency.com",
-            "agency_timezone": TimeZone.America_New_York.value,
+            "agency_timezone": TimeZone.America_New_York,  # type: ignore[attr-defined]
         }
     )
 )
@@ -39,14 +39,14 @@ def test_create_agency(agency_data):
     "line_data",
     (
         {
-            "line_id": 1,
+            "line_id": "Line 1",
             "line_short_name": "line_short",
             "line_long_name": "line_long",
             "line_desc": "description",
             "line_url": "http://www.agency.com/line",
             "line_color": "DA291C",
             "line_text_color": "FFFFFF",
-            "line_sort_order": "100"
+            "line_sort_order": 100
         },
         {
             "line_id": 1,
@@ -63,3 +63,41 @@ def test_create_line(line_data):
     )
     for k, v in line_data.items():
         assert getattr(line, k) == v
+
+
+@pytest.mark.parametrize(
+    "route_data",
+    (
+        {
+            "route_id": "Route",
+            "agency_id": 1,
+            "route_short_name": "Route Short Name",
+            "route_long_name": "Route Long Name",
+            "route_desc": "Route Description",
+            "route_type": RouteType.type_0,
+            "route_url": "http://www.agency.com/route",
+            "route_color": "DA291C",
+            "route_text_color": "FFFFFF",
+            "route_sort_order": 100,
+            "route_fare_class": FareClass.rapid_transit,
+            "line_id": "Line 1"
+        },
+        {
+            "route_id": "Route",
+            "agency_id": 1,
+            "route_long_name": "Route Long Name",
+            "route_type": RouteType.type_0,
+        }
+    )
+)
+def test_create_route(route_data):
+    init_data = {k: v for k, v in route_data.items()}
+    route = Route(
+        init_data.pop("route_id"),
+        init_data.pop("agency_id"),
+        init_data.pop("route_long_name"),
+        init_data.pop("route_type"),
+        **init_data
+    )
+    for k, v in route_data.items():
+        assert getattr(route, k) == v

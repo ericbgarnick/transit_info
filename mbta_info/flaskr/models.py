@@ -13,10 +13,10 @@ from mbta_info.flaskr.app import db
 
 logger = logging.getLogger(__name__)
 
-TimeZone = enum.Enum(  # type: ignore
+TimeZone = enum.Enum(  # type: ignore[misc]
     "TimeZone", {tz.replace("/", "_"): tz for tz in pytz.all_timezones}
 )
-LangCode = enum.Enum(  # type: ignore
+LangCode = enum.Enum(  # type: ignore[misc]
     "LangCode",
     {
         lang.alpha_2: lang.alpha_2
