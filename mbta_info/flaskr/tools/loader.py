@@ -1,7 +1,7 @@
 import csv
 import os
 from pathlib import Path
-from typing import Dict, Set, Union
+from typing import Dict, Set, Union, List
 
 from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
@@ -10,32 +10,30 @@ from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr import schemas, models, app
 
-DATA_FILES = app.config['mbta_data']['files']
+DATA_FILES = app.config['mbta_data']['files'].get()
+DATA_PATH = Path(Path(__name__).absolute().parent, app.config['mbta_data']['path'].get())
 
 
 class Loader:
-    PROJECT_PATH = Path("mbta_info", "flaskr", "data")
-
     def __init__(self, db: SQLAlchemy, max_batch_size: int = 100000):
         self.db = db
         db.create_all()
         self._max_batch_size = max_batch_size
-        self._parent_dir = Path(__name__).absolute().parent
 
-    def load_data(self):
-        for data_file_name in DATA_FILES:
+    def load_data(self, data_files: List[str] = DATA_FILES):
+        import pdb
+        pdb.set_trace()
+        for data_file_name in data_files:
             print(f"Loading data from {data_file_name}")
-            data_file_path = Path(
-                self._parent_dir.absolute(), Loader.PROJECT_PATH, data_file_name
-            )
+
             model_name = create_model_name(data_file_name)
-            model = getattr(models, model_name)
-            model_pk_field = inspect(model).primary_key[0].name
-            existing_pks = {
-                tup[0]
-                for tup in self.db.session.query(getattr(model, model_pk_field)).all()
-            }
             model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
+            model = getattr(models, model_name)
+
+            model_pk_field = inspect(model).primary_key[0].name
+            existing_pks = {tup[0] for tup in self.db.session.query(getattr(model, model_pk_field)).all()}
+
+            data_file_path = Path(DATA_PATH, data_file_name)
             with open(data_file_path, "r") as f_in:
                 reader = csv.DictReader(f_in)
                 cur_batch_size = 0
