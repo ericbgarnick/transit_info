@@ -1,5 +1,4 @@
 import csv
-import os
 from pathlib import Path
 from typing import Dict, Set, Union, List
 
@@ -9,6 +8,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr import schemas, models, app
+from mbta_info.flaskr.tools.utils import create_model_name
 
 DATA_FILES = app.config["mbta_data"]["files"].get()
 DATA_PATH = Path(
@@ -96,9 +96,3 @@ class Loader:
             self.db.session.rollback()
             self.db.session.close()
             raise e
-
-
-def create_model_name(data_file_name: str) -> str:
-    raw_file_name = os.path.splitext(data_file_name)[0]
-    words_no_plural = raw_file_name.rstrip("s").split("_")
-    return "".join([word.title() for word in words_no_plural])
