@@ -1,12 +1,11 @@
 import typing
 
-from marshmallow import ValidationError
-from marshmallow.fields import String
+import marshmallow as mm
 
-from mbta_info.flaskr.models import Route
+from mbta_info.flaskr import models
 
 
-class RouteId(String):
+class RouteId(mm.fields.String):
     """
     A marshmallow Field for validating Route id ForeignKey field data
     """
@@ -20,15 +19,15 @@ class RouteId(String):
         self.error_messages["missing_route"] = self.MISSING_ROUTE_MESSAGE
 
     def _deserialize(self, value, attr, data, **kwargs) -> typing.Optional[str]:
-        if Route.query.filter_by(route_id=value).count():
+        if models.Route.query.filter_by(route_id=value).count():
             return value
-        elif not Route.query.count():
+        elif not models.Route.query.count():
             raise self.make_error("no_routes")
         else:
             raise self.make_error("missing_route", route_id=value)
 
     @staticmethod
-    def is_missing_route_error(error: ValidationError) -> bool:
+    def is_missing_route_error(error: mm.ValidationError) -> bool:
         """Return True if the message for error matches RouteId.MISSING_ROUTE_MESSAGE. Otherwise return False."""
         try:
             err_message = error.normalized_messages().get("route_id", [""])[0]

@@ -1,18 +1,18 @@
 import csv
 from pathlib import Path
-from typing import Dict, Set, Union, List
+import typing
 
 from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
 from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr import schemas, models, app
-from mbta_info.flaskr.tools.utils import create_model_name
+from mbta_info.flaskr import schemas, models, config
+from mbta_info.flaskr.tools.utils import model_name_from_table_name
 
-DATA_FILES = app.config["mbta_data"]["files"].get()
+DATA_FILES = config["mbta_data"]["files"].get()
 DATA_PATH = Path(
-    Path(__name__).absolute().parent, app.config["mbta_data"]["path"].get()
+    Path(__name__).absolute().parent, config["mbta_data"]["path"].get()
 )
 
 
@@ -21,15 +21,13 @@ class Loader:
         self.db = db
         db.create_all()
         self._max_batch_size = max_batch_size
+        self._table_names = [table.name for table in self.db.metadata.sorted_tables]
 
-    def load_data(self, data_files: List[str] = DATA_FILES):
-        import pdb
+    def load_data(self):
+        for table_name in self._table_names:
+            print(f"Loading data for {table_name} table")
 
-        pdb.set_trace()
-        for data_file_name in data_files:
-            print(f"Loading data from {data_file_name}")
-
-            model_name = create_model_name(data_file_name)
+            model_name = model_name_from_table_name(table_name)
             model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
             model = getattr(models, model_name)
 
@@ -39,6 +37,7 @@ class Loader:
                 for tup in self.db.session.query(getattr(model, model_pk_field)).all()
             }
 
+            data_file_name = DATA_FILES[table_name]
             data_file_path = Path(DATA_PATH, data_file_name)
             with open(data_file_path, "r") as f_in:
                 reader = csv.DictReader(f_in)
@@ -59,8 +58,8 @@ class Loader:
         model: Model,
         model_schema: Schema,
         model_pk_field: str,
-        existing_pks: Set[Union[str, int]],
-        data_row: Dict,
+        existing_pks: typing.Set[typing.Union[str, int]],
+        data_row: typing.Dict,
     ) -> int:
         """Update or create a database entry, returning 1 for if
         the data_row was successfully processed, 0 if skipped"""

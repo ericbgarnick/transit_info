@@ -1,7 +1,7 @@
 import datetime
 import enum
 import logging
-from typing import Tuple, Optional, ClassVar, Union
+import typing
 
 import pycountry
 import pytz
@@ -9,7 +9,7 @@ from geoalchemy2 import Geometry
 from sqlalchemy import func, inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr.app import db
+from mbta_info.flaskr.database import db
 
 logger = logging.getLogger(__name__)
 
@@ -29,24 +29,24 @@ LangCode = enum.Enum(  # type: ignore[misc]
 class GeoMixin:
     """A mixin class for models having a Geometry POINT field - allows convenient, cached access to lon/lat values"""
 
-    lonlat_field: ClassVar[str]
-    _longitude_cache: Optional[float] = None
-    _latitude_cache: Optional[float] = None
+    lonlat_field: typing.ClassVar[str]
+    _longitude_cache: typing.Optional[float] = None
+    _latitude_cache: typing.Optional[float] = None
 
     @property
-    def longitude(self) -> Optional[float]:
+    def longitude(self) -> typing.Optional[float]:
         if self._longitude_cache is None:
             self._longitude_cache, self._latitude_cache = self.lonlat
         return self._longitude_cache
 
     @property
-    def latitude(self) -> Optional[float]:
+    def latitude(self) -> typing.Optional[float]:
         if self._latitude_cache is None:
             self._longitude_cache, self._latitude_cache = self.lonlat
         return self._latitude_cache
 
     @property
-    def lonlat(self) -> Union[Tuple[None, None], Tuple[float, float]]:
+    def lonlat(self) -> typing.Union[typing.Tuple[None, None], typing.Tuple[float, float]]:
         """
         Return a tuple of (lon, lat) or return None and log exception if no coordinates can be retrieved.
 
@@ -76,7 +76,7 @@ class Agency(db.Model):
     """
 
     agency_id = db.Column(db.Integer, primary_key=True)
-    agency_name = db.Column(db.String(16), nullable=False, unique=True)
+    agency_name = db.Column(db.String(64), nullable=False, unique=True)
     agency_url = db.Column(db.String(64), nullable=False, unique=True)
     agency_timezone = db.Column(db.Enum(TimeZone), nullable=False)
     agency_lang = db.Column(db.Enum(LangCode), nullable=True)
@@ -146,6 +146,7 @@ class FareClass(enum.Enum):
     inner_express = 4
     outer_express = 5
     free = 6
+    special = 7
 
 
 class Route(db.Model):

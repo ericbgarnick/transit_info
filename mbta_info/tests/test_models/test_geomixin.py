@@ -3,7 +3,7 @@ from typing import Tuple
 from geoalchemy2 import Geometry
 
 from mbta_info.flaskr.models import GeoMixin
-from mbta_info.flaskr.app import db
+from mbta_info.flaskr.database import db
 
 
 class GeoStub(db.Model, GeoMixin):
