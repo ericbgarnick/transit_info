@@ -20,11 +20,11 @@ class Loader:
     def __init__(self, db: SQLAlchemy, max_batch_size: int = 100000):
         self.db = db
         db.create_all()
-        self._max_batch_size = max_batch_size
-        self._table_names = [table.name for table in self.db.metadata.sorted_tables]
+        self.max_batch_size = max_batch_size
+        self.table_names = [table.name for table in self.db.metadata.sorted_tables]
 
     def load_data(self):
-        for table_name in self._table_names:
+        for table_name in self.table_names:
             print(f"Loading data for {table_name} table")
 
             model_name = model_name_from_table_name(table_name)
@@ -46,7 +46,7 @@ class Loader:
                     cur_batch_size += self._update_or_create_object(
                         model, model_schema, model_pk_field, existing_pks, data_row
                     )
-                    if cur_batch_size == self._max_batch_size:
+                    if cur_batch_size == self.max_batch_size:
                         self._commit_batch()
                         print(f"Loaded {cur_batch_size} rows from {data_file_name}")
                         cur_batch_size = 0
