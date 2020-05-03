@@ -1,13 +1,13 @@
-import confuse
-from flask import Flask
+from flask import Flask, g
 
-config = confuse.Configuration("transit_info", __name__)
+from mbta_info.config import Config
 
 
-def create_app(env_name: str = "dev"):
+def create_app():
     app = Flask(__name__)
-    app.config.from_mapping(config["flask"][env_name].get())
-    register_extensions(app, env_name == "test")
+    c = Config()
+    app.config.from_mapping(c.config["flask"])
+    register_extensions(app, c.flask_env == "test")
     return app
 
 
@@ -18,3 +18,9 @@ def register_extensions(app: Flask, testing):
     if testing:
         from mbta_info.tests import models as test_models
     db.init_app(app)
+
+
+def set_g():
+    c = Config()
+    g.config = c.config
+    g.env = c.flask_env

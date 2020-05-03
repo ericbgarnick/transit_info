@@ -1,19 +1,15 @@
 import csv
+import importlib
 from pathlib import Path
 import typing
 
+from flask import g
 from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
 from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr import schemas, models, config
 from mbta_info.flaskr.tools.utils import model_name_from_table_name
-
-DATA_FILES = config["mbta_data"]["files"].get()
-DATA_PATH = Path(
-    Path(__name__).absolute().parent, config["mbta_data"]["path"].get()
-)
 
 
 class Loader:
@@ -27,9 +23,7 @@ class Loader:
         for table_name in self.table_names:
             print(f"Loading data for {table_name} table")
 
-            model_name = model_name_from_table_name(table_name)
-            model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
-            model = getattr(models, model_name)
+            model, model_schema = self.get_model_and_schema(table_name)
 
             model_pk_field = inspect(model).primary_key[0].name
             existing_pks = {
@@ -37,8 +31,7 @@ class Loader:
                 for tup in self.db.session.query(getattr(model, model_pk_field)).all()
             }
 
-            data_file_name = DATA_FILES[table_name]
-            data_file_path = Path(DATA_PATH, data_file_name)
+            data_file_path = self.get_data_file_path(table_name)
             with open(data_file_path, "r") as f_in:
                 reader = csv.DictReader(f_in)
                 cur_batch_size = 0
@@ -48,10 +41,30 @@ class Loader:
                     )
                     if cur_batch_size == self.max_batch_size:
                         self._commit_batch()
-                        print(f"Loaded {cur_batch_size} rows from {data_file_name}")
+                        print(f"Loaded {cur_batch_size} rows from {data_file_path}")
                         cur_batch_size = 0
                 # Commit last batch
                 self._commit_batch(last_batch=True)
+
+    @staticmethod
+    def get_model_and_schema(table_name: str) -> typing.Tuple[Model, Schema]:
+        models = importlib.import_module(g.config['import_dir'] + ".models")
+        schemas = importlib.import_module(g.config['import_dir'] + ".schemas")
+
+        model_name = model_name_from_table_name(table_name)
+        model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
+        model = getattr(models, model_name)
+        return model, model_schema
+
+    @staticmethod
+    def get_data_file_path(table_name: str) -> str:
+        data_files = g.config["mbta_data"]["files"]
+        data_path = Path(
+            Path(__name__).cwd(), g.config["mbta_data"]["path"]
+        )
+
+        data_file_name = data_files[table_name]
+        return Path(data_path, data_file_name)
 
     def _update_or_create_object(
         self,

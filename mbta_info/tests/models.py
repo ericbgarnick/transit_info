@@ -1,3 +1,6 @@
+"""
+Models used for testing independent of real data models
+"""
 import typing
 import geoalchemy2
 
