@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+import typing
 
 import marshmallow as mm
 from marshmallow_enum import EnumField
@@ -20,13 +20,13 @@ class AgencySchema(mm.Schema):
     agency_phone = mm.fields.Str()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["agency_timezone"] = schema_utils.timezone_enum_key(in_data["agency_timezone"])
         in_data["agency_lang"] = in_data.get("agency_lang", "").lower()
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_agency(self, data: Dict, **kwargs) -> mbta_models.Agency:
+    def make_agency(self, data: typing.Dict, **kwargs) -> mbta_models.Agency:
         return mbta_models.Agency(
             data.pop("agency_id"),
             data.pop("agency_name"),
@@ -47,11 +47,11 @@ class LineSchema(mm.Schema):
     line_sort_order = mm.fields.Int()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_line(self, data: Dict, **kwargs) -> mbta_models.Line:
+    def make_line(self, data: typing.Dict, **kwargs) -> mbta_models.Line:
         return mbta_models.Line(data.pop("line_id"), data.pop("line_long_name"), **data)
 
 
@@ -70,7 +70,7 @@ class RouteSchema(mm.Schema):
     line_id = mm.fields.Str()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data.pop("listed_route", None)
         in_data["route_fare_class"] = (
             in_data["route_fare_class"].replace(" ", "_").lower()
@@ -79,7 +79,7 @@ class RouteSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_route(self, data: Dict, **kwargs) -> mbta_models.Route:
+    def make_route(self, data: typing.Dict, **kwargs) -> mbta_models.Route:
         return mbta_models.Route(
             data.pop("route_id"),
             data.pop("agency_id"),
@@ -113,7 +113,7 @@ class StopSchema(mm.Schema):
     stop_timezone = EnumField(mbta_models.TimeZone)
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["location_type"] = schema_utils.numbered_type_enum_key(
             in_data["location_type"], default_0=True
         )
@@ -125,7 +125,7 @@ class StopSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_stop(self, data: Dict, **kwargs) -> mbta_models.Stop:
+    def make_stop(self, data: typing.Dict, **kwargs) -> mbta_models.Stop:
         try:
             lon = data.pop("stop_lon")
             lat = data.pop("stop_lat")
@@ -150,7 +150,7 @@ class CalendarSchema(mm.Schema):
     end_date = mm.fields.Date(format=DATE_INPUT_FORMAT, required=True)
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         for day in [
             "monday",
             "tuesday",
@@ -164,7 +164,7 @@ class CalendarSchema(mm.Schema):
         return in_data
 
     @mm.post_load
-    def make_calendar(self, data: Dict, **kwargs) -> mbta_models.Calendar:
+    def make_calendar(self, data: typing.Dict, **kwargs) -> mbta_models.Calendar:
         return mbta_models.Calendar(
             data.pop("service_id"),
             data.pop("monday"),
@@ -187,11 +187,11 @@ class ShapeSchema(mm.Schema):
     shape_dist_traveled = mm.fields.Float()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_shape(self, data: Dict, **kwargs) -> mbta_models.Shape:
+    def make_shape(self, data: typing.Dict, **kwargs) -> mbta_models.Shape:
         return mbta_models.Shape(
             data.pop("shape_id"),
             data.pop("shape_pt_lon"),
@@ -207,7 +207,7 @@ class DirectionSchema(mm.Schema):
     direction = mm.fields.Str(required=True)
     direction_destination = mm.fields.Str(required=True)
 
-    def load(self, *args, **kwargs) -> Optional[mbta_models.Direction]:
+    def load(self, *args, **kwargs) -> typing.Optional[mbta_models.Direction]:
         """Load direction data, skipping rows that reference non-existent Routes"""
         try:
             return super().load(*args, **kwargs)
@@ -219,7 +219,7 @@ class DirectionSchema(mm.Schema):
                 raise ve
 
     @mm.post_load
-    def make_direction(self, data: Dict, **kwargs) -> mbta_models.Direction:
+    def make_direction(self, data: typing.Dict, **kwargs) -> mbta_models.Direction:
         return mbta_models.Direction(
             route_id=data.pop("route_id"),
             direction_id=data.pop("direction_id"),
@@ -239,11 +239,11 @@ class RoutePatternSchema(mm.Schema):
     representative_trip_id = mm.fields.Str()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_route_pattern(self, data: Dict, **kwargs) -> mbta_models.RoutePattern:
+    def make_route_pattern(self, data: typing.Dict, **kwargs) -> mbta_models.RoutePattern:
         return mbta_models.RoutePattern(
             route_pattern_id=data.pop("route_pattern_id"),
             route_id=data.pop("route_id"),
@@ -266,7 +266,7 @@ class TripSchema(mm.Schema):
     bikes_allowed = EnumField(mbta_models.TripAccessibility)
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["wheelchair_accessible"] = schema_utils.numbered_type_enum_key(
             in_data["wheelchair_accessible"], default_0=True
         )
@@ -277,7 +277,7 @@ class TripSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_trip(self, data: Dict, **kwargs) -> mbta_models.Trip:
+    def make_trip(self, data: typing.Dict, **kwargs) -> mbta_models.Trip:
         return mbta_models.Trip(
             trip_id=data.pop("trip_id"),
             route_id=data.pop("route_id"),
@@ -291,7 +291,7 @@ class CheckpointSchema(mm.Schema):
     checkpoint_name = mm.fields.Str(required=True)
 
     @mm.post_load
-    def make_checkpoint(self, data: Dict, **kwargs) -> mbta_models.Checkpoint:
+    def make_checkpoint(self, data: typing.Dict, **kwargs) -> mbta_models.Checkpoint:
         return mbta_models.Checkpoint(
             checkpoint_id=data.pop("checkpoint_id"),
             checkpoint_name=data.pop("checkpoint_name"),
@@ -312,7 +312,7 @@ class StopTimeSchema(mm.Schema):
     checkpoint_id = mm.fields.Str()
 
     @mm.pre_load
-    def convert_input(self, in_data: Dict, **kwargs) -> Dict:
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["arrival_time"] = schema_utils.time_as_seconds(in_data["arrival_time"])
         in_data["departure_time"] = schema_utils.time_as_seconds(in_data["departure_time"])
         in_data["pickup_type"] = schema_utils.numbered_type_enum_key(
@@ -324,7 +324,7 @@ class StopTimeSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_stop_time(self, data: Dict, **kwargs) -> mbta_models.StopTime:
+    def make_stop_time(self, data: typing.Dict, **kwargs) -> mbta_models.StopTime:
         return mbta_models.StopTime(
             trip_id=data.pop("trip_id"),
             arrival_time=data.pop("arrival_time"),
