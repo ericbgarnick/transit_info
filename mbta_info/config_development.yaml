@@ -7,7 +7,7 @@ flask:
 import_dir: "mbta_info.flaskr"
 
 mbta_data:
-  path: "mbta_info/flaskr/data"
+  path: "mbta_info/data"
   files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
   files:  # table names mapped to data file names
     agency: "agency.txt"

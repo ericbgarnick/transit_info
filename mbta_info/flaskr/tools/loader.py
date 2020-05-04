@@ -15,9 +15,11 @@ from mbta_info.flaskr.tools.utils import model_name_from_table_name
 class Loader:
     def __init__(self, db: SQLAlchemy, max_batch_size: int = 100000):
         self.db = db
+        print("DB:", db)
         db.create_all()
         self.max_batch_size = max_batch_size
         self.table_names = [table.name for table in self.db.metadata.sorted_tables]
+        print("TABLE NAMES:", self.table_names)
 
     def load_data(self):
         for table_name in self.table_names:

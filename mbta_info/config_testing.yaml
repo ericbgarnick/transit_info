@@ -8,17 +8,7 @@ flask:
 import_dir: "mbta_info.tests"
 
 mbta_data:
-  path: "mbta_info/flaskr/data"
+  path: "mbta_info/data"
   files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
   files:  # table names mapped to data file names
-    agency: "agency.txt"
-    calendar: "calendar.txt"
-    checkpoint: "checkpoints.txt"
-    direction: "directions.txt"
-    line: "lines.txt"
-    route_pattern: "route_patterns.txt"
-    route: "routes.txt"
-    shape: "shapes.txt"
-    stop_time: "stop_times.txt"
-    stop: "stops.txt"
-    trip: "trips.txt"
+    test_model: "test_models.txt"

@@ -2,4 +2,4 @@ venv
 .idea/
 __pycache__/
 .mypy_cache/
-mbta_info/flaskr/data
+mbta_info/data

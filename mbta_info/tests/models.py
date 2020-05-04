@@ -12,7 +12,8 @@ from mbta_info.flaskr import models
 class GeoStub(db.Model, models.GeoMixin):
     lonlat_field = "lonlat_column"
 
-    lonlat_column = db.Column(geoalchemy2.Geometry("POINT"), primary_key=True)
+    geo_stub_id = db.Column(db.Integer, primary_key=True)
+    lonlat_column = db.Column(geoalchemy2.Geometry("POINT"))
 
     def __init__(self, lonlat_val: typing.Tuple[float, float]):
         lon, lat = lonlat_val
@@ -35,6 +36,8 @@ class TestModel(db.Model):
     test_name = db.Column(db.String(64), nullable=False, unique=True)
     test_type = db.Column(db.Enum(TestType), nullable=False)
     test_dist = db.Column(db.Float, nullable=True)
+    geo_stub_id = db.Column(db.Integer, db.ForeignKey("geo_stub.geo_stub_id"), nullable=True)
+    geo_stub = db.relationship("GeoStub", backref="test_models")
 
     def __init__(
         self, test_id: int, test_name: str, test_type: TestType, **kwargs

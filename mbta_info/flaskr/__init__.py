@@ -7,7 +7,7 @@ def create_app():
     app = Flask(__name__)
     c = Config()
     app.config.from_mapping(c.config["flask"])
-    register_extensions(app, c.flask_env == "test")
+    register_extensions(app, c.flask_env == "testing")
     return app
 
 
