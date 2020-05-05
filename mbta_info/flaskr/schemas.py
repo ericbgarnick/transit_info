@@ -21,7 +21,9 @@ class AgencySchema(mm.Schema):
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
-        in_data["agency_timezone"] = schema_utils.timezone_enum_key(in_data["agency_timezone"])
+        in_data["agency_timezone"] = schema_utils.timezone_enum_key(
+            in_data["agency_timezone"]
+        )
         in_data["agency_lang"] = in_data.get("agency_lang", "").lower()
         return {k: v for k, v in in_data.items() if v}
 
@@ -75,7 +77,9 @@ class RouteSchema(mm.Schema):
         in_data["route_fare_class"] = (
             in_data["route_fare_class"].replace(" ", "_").lower()
         )
-        in_data["route_type"] = schema_utils.numbered_type_enum_key(in_data["route_type"])
+        in_data["route_type"] = schema_utils.numbered_type_enum_key(
+            in_data["route_type"]
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
@@ -120,8 +124,12 @@ class StopSchema(mm.Schema):
         in_data["wheelchair_boarding"] = schema_utils.numbered_type_enum_key(
             in_data["wheelchair_boarding"], default_0=True
         )
-        in_data["vehicle_type"] = schema_utils.numbered_type_enum_key(in_data["vehicle_type"])
-        in_data["stop_timezone"] = schema_utils.timezone_enum_key(in_data.get("stop_timezone"))
+        in_data["vehicle_type"] = schema_utils.numbered_type_enum_key(
+            in_data["vehicle_type"]
+        )
+        in_data["stop_timezone"] = schema_utils.timezone_enum_key(
+            in_data.get("stop_timezone")
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
@@ -243,7 +251,9 @@ class RoutePatternSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_route_pattern(self, data: typing.Dict, **kwargs) -> mbta_models.RoutePattern:
+    def make_route_pattern(
+        self, data: typing.Dict, **kwargs
+    ) -> mbta_models.RoutePattern:
         return mbta_models.RoutePattern(
             route_pattern_id=data.pop("route_pattern_id"),
             route_id=data.pop("route_id"),
@@ -270,7 +280,9 @@ class TripSchema(mm.Schema):
         in_data["wheelchair_accessible"] = schema_utils.numbered_type_enum_key(
             in_data["wheelchair_accessible"], default_0=True
         )
-        in_data["trip_route_type"] = schema_utils.numbered_type_enum_key(in_data["trip_route_type"])
+        in_data["trip_route_type"] = schema_utils.numbered_type_enum_key(
+            in_data["trip_route_type"]
+        )
         in_data["bikes_allowed"] = schema_utils.numbered_type_enum_key(
             in_data["bikes_allowed"], default_0=True
         )
@@ -314,7 +326,9 @@ class StopTimeSchema(mm.Schema):
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["arrival_time"] = schema_utils.time_as_seconds(in_data["arrival_time"])
-        in_data["departure_time"] = schema_utils.time_as_seconds(in_data["departure_time"])
+        in_data["departure_time"] = schema_utils.time_as_seconds(
+            in_data["departure_time"]
+        )
         in_data["pickup_type"] = schema_utils.numbered_type_enum_key(
             in_data["pickup_type"], default_0=True
         )

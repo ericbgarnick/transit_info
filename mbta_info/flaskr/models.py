@@ -46,7 +46,9 @@ class GeoMixin:
         return self._latitude_cache
 
     @property
-    def lonlat(self) -> typing.Union[typing.Tuple[None, None], typing.Tuple[float, float]]:
+    def lonlat(
+        self,
+    ) -> typing.Union[typing.Tuple[None, None], typing.Tuple[float, float]]:
         """
         Return a tuple of (lon, lat) or return None and log exception if no coordinates can be retrieved.
 

@@ -14,9 +14,9 @@ class GeoStubSchema(mm.Schema):
     @mm.post_load
     def make_geo_stub(self, data: typing.Dict) -> test_models.GeoStub:
         return test_models.GeoStub(
-            geo_stub_id=data.pop('geo_stub_id'),
-            longitude=data.pop('longitude'),
-            latitude=data.pop('latitude')
+            geo_stub_id=data.pop("geo_stub_id"),
+            longitude=data.pop("longitude"),
+            latitude=data.pop("latitude"),
         )
 
 
@@ -35,8 +35,5 @@ class TestModelSchema(mm.Schema):
     @mm.post_load
     def make_test_model(self, data: typing.Dict) -> test_models.TestModel:
         return test_models.TestModel(
-            data.pop("test_id"),
-            data.pop("test_name"),
-            data.pop("test_type"),
-            **data
+            data.pop("test_id"), data.pop("test_name"), data.pop("test_type"), **data
         )

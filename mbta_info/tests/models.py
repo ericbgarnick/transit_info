@@ -2,7 +2,6 @@
 Models used for testing independent of real data models
 """
 import enum
-import typing
 import geoalchemy2
 
 from mbta_info.flaskr.database import db
@@ -36,12 +35,12 @@ class TestModel(db.Model):
     test_name = db.Column(db.String(64), nullable=False, unique=True)
     test_type = db.Column(db.Enum(TestType), nullable=False)
     test_dist = db.Column(db.Float, nullable=True)
-    geo_stub_id = db.Column(db.Integer, db.ForeignKey("geo_stub.geo_stub_id"), nullable=True)
+    geo_stub_id = db.Column(
+        db.Integer, db.ForeignKey("geo_stub.geo_stub_id"), nullable=True
+    )
     geo_stub = db.relationship("GeoStub", backref="test_models")
 
-    def __init__(
-        self, test_id: int, test_name: str, test_type: TestType, **kwargs
-    ):
+    def __init__(self, test_id: int, test_name: str, test_type: TestType, **kwargs):
         self.test_id = test_id
         self.test_name = test_name
         self.test_type = test_type

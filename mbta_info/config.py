@@ -8,7 +8,7 @@ import yaml
 
 class Config:
     def __init__(self):
-        self._flask_env = os.getenv('FLASK_ENV')
+        self._flask_env = os.getenv("FLASK_ENV")
         if not self._flask_env:
             raise RuntimeError("No FLASK_ENV value set!")
 
@@ -16,7 +16,7 @@ class Config:
             pathlib.Path(__name__).cwd(), "mbta_info", f"config_{self._flask_env}.yaml"
         )
 
-        self._config = yaml.load(open(self._config_file, 'r'), yaml.Loader)
+        self._config = yaml.load(open(self._config_file, "r"), yaml.Loader)
         if not self._config:
             raise RuntimeError(f"No config loaded from {self._config_file}")
 

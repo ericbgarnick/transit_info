@@ -8,6 +8,7 @@ from mbta_info.flaskr import create_app, set_g
 @pytest.fixture(scope="session")
 def monkeysession(request):
     from _pytest.monkeypatch import MonkeyPatch
+
     mpatch = MonkeyPatch()
     yield mpatch
     mpatch.undo()
@@ -15,7 +16,7 @@ def monkeysession(request):
 
 @pytest.fixture(scope="session", autouse=True)
 def set_test_env(monkeysession):
-    monkeysession.setenv('FLASK_ENV', "testing")
+    monkeysession.setenv("FLASK_ENV", "testing")
 
 
 @pytest.fixture

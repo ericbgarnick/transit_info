@@ -11,7 +11,7 @@ from mbta_info.flaskr.schema_utils import (
 
 @pytest.mark.parametrize(
     "raw_value,updated_value",
-    [(None, None), ("", ""), ("a", "a"), ("/", "_"), ("a/a", "a_a")]
+    [(None, None), ("", ""), ("a", "a"), ("/", "_"), ("a/a", "a_a")],
 )
 def test_timezone_enum_key(raw_value: Optional[str], updated_value: Optional[str]):
     assert timezone_enum_key(raw_value) == updated_value
@@ -25,7 +25,7 @@ def test_numbered_type_enum_key_bad_value(raw_value):
 
 @pytest.mark.parametrize(
     "raw_value,updated_value",
-    [(None, None), ("", None), ("0", "type_0"), ("234", "type_234")]
+    [(None, None), ("", None), ("0", "type_0"), ("234", "type_234")],
 )
 def test_numbered_type_enum_key_no_default(
     raw_value: Optional[str], updated_value: Optional[str]
@@ -35,7 +35,7 @@ def test_numbered_type_enum_key_no_default(
 
 @pytest.mark.parametrize(
     "raw_value,updated_value",
-    [(None, "type_0"), ("", "type_0"), ("0", "type_0"), ("234", "type_234")]
+    [(None, "type_0"), ("", "type_0"), ("0", "type_0"), ("234", "type_234")],
 )
 def test_numbered_type_enum_key_with_default(
     raw_value: Optional[str], updated_value: str
@@ -51,7 +51,7 @@ def test_time_as_seconds_bad_value(time_string: str):
 
 @pytest.mark.parametrize(
     "time_string,num_seconds",
-    [("00:00:00", 0), ("00:00:10", 10), ("00:10:10", 610), ("10:10:10", 36610)]
+    [("00:00:00", 0), ("00:00:10", 10), ("00:10:10", 610), ("10:10:10", 36610)],
 )
 def test_time_as_seconds(time_string: str, num_seconds: int):
     assert time_as_seconds(time_string) == num_seconds

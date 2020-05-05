@@ -10,6 +10,7 @@ from mbta_info.config import Config
 
 class Retriever:
     """Retrieve GTFS data files"""
+
     config = Config().config
 
     def __init__(self):
@@ -22,7 +23,8 @@ class Retriever:
         self._validate_zipfile_contents(zf)
         if not self.errors:
             data_path = pathlib.Path(
-                pathlib.Path(__name__).absolute().parent, self.config["mbta_data"]["path"]
+                pathlib.Path(__name__).absolute().parent,
+                self.config["mbta_data"]["path"],
             )
             zf.extractall(data_path)
         else:
@@ -50,6 +52,6 @@ class Retriever:
         print("BAD STUFF HAPPENED")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     r = Retriever()
     r.retrieve_data()

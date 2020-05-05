@@ -25,14 +25,27 @@ class DbStub:
         self.metadata = self.MetaData(tables)
 
 
-@pytest.mark.parametrize("batch_size_to_set, batch_size_expected", [([], 100000), ([10], 10)])
+@pytest.mark.parametrize(
+    "batch_size_to_set, batch_size_expected", [([], 100000), ([10], 10)]
+)
 def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
     """Assert Loader calls db.create_all(), sets max_batch_size and table_names"""
     # GIVEN
-    monkeypatch.setattr(db, 'create_all', mock.Mock())
+    monkeypatch.setattr(db, "create_all", mock.Mock())
     table_names = [
-        'agency', 'calendar', 'checkpoint', 'geo_stub', 'line', 'shape', 'stop',
-        'route', 'test_model', 'direction', 'route_pattern', 'trip', 'stop_time'
+        "agency",
+        "calendar",
+        "checkpoint",
+        "geo_stub",
+        "line",
+        "shape",
+        "stop",
+        "route",
+        "test_model",
+        "direction",
+        "route_pattern",
+        "trip",
+        "stop_time",
     ]
     loader_args = [db] + batch_size_to_set
 
@@ -46,11 +59,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "last_batch, expected_calls",
-    [
-        (False, ("commit",)),
-        (True, ("commit", "close"))
-    ]
+    "last_batch, expected_calls", [(False, ("commit",)), (True, ("commit", "close"))]
 )
 def test_commit_batch_success(last_batch, expected_calls, db, monkeypatch):
     """Assert commit() and close() calls when no data exception occurs"""
@@ -74,6 +83,7 @@ def test_commit_batch_failure(db, monkeypatch):
     # GIVEN
     def raise_data_error():
         raise DataError(None, None, None)
+
     monkeypatch.setattr(db.session, "commit", mock.Mock(side_effect=raise_data_error))
     monkeypatch.setattr(db.session, "rollback", mock.Mock())
     monkeypatch.setattr(db.session, "close", mock.Mock())
@@ -116,7 +126,9 @@ def test_get_schema_for_table(db):
 def test_get_data_file_path(db):
     # GIVEN
     table_name = "test_model"
-    expected_path = pathlib.Path(pathlib.Path(__name__).cwd(), f"mbta_info/data/{table_name}s.txt")
+    expected_path = pathlib.Path(
+        pathlib.Path(__name__).cwd(), f"mbta_info/data/{table_name}s.txt"
+    )
 
     # WHEN
     loader = Loader(db)
