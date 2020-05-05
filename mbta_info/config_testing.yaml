@@ -11,4 +11,5 @@ mbta_data:
   path: "mbta_info/data"
   files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
   files:  # table names mapped to data file names
+    geo_stub: "geo_stubs.txt"
     test_model: "test_models.txt"

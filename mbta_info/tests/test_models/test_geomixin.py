@@ -22,7 +22,7 @@ def test_lonlat_from_field(app):
     longitude = 1.0
     latitude = 2.0
 
-    geo_stub = test_models.GeoStub((longitude, latitude))
+    geo_stub = test_models.GeoStub(1, longitude, latitude)
 
     # Retrieves correct value and populates cache attrs
     assert geo_stub.longitude == geo_stub._longitude_cache == longitude

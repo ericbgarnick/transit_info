@@ -4,14 +4,16 @@ import pathlib
 import typing
 
 import requests
-from flask import g
+
+from mbta_info.config import Config
 
 
 class Retriever:
     """Retrieve GTFS data files"""
+    config = Config().config
 
     def __init__(self):
-        self.data_url: str = g.config["mbta_data"]["files_url"]
+        self.data_url: str = self.config["mbta_data"]["files_url"]
         self.errors = []
         self.missing_filenames: typing.Set[str] = set()
 
@@ -20,7 +22,7 @@ class Retriever:
         self._validate_zipfile_contents(zf)
         if not self.errors:
             data_path = pathlib.Path(
-                pathlib.Path(__name__).absolute().parent, g.config["mbta_data"]["path"]
+                pathlib.Path(__name__).absolute().parent, self.config["mbta_data"]["path"]
             )
             zf.extractall(data_path)
         else:
@@ -38,7 +40,7 @@ class Retriever:
 
     def _validate_zipfile_contents(self, zf: zipfile.ZipFile):
         retrieved_filenames = set(zf.namelist())
-        for filename in g.config["mbta_data"]["files"]:
+        for filename in self.config["mbta_data"]["files"]:
             if filename not in retrieved_filenames:
                 self.missing_filenames.add(filename)
         if self.missing_filenames:
@@ -46,3 +48,8 @@ class Retriever:
 
     def _report_errors(self):
         print("BAD STUFF HAPPENED")
+
+
+if __name__ == '__main__':
+    r = Retriever()
+    r.retrieve_data()

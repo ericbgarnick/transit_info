@@ -6,6 +6,20 @@ from mbta_info.flaskr import schema_utils
 from mbta_info.tests import models as test_models
 
 
+class GeoStubSchema(mm.Schema):
+    geo_stub_id = mm.fields.Int(required=True)
+    longitude = mm.fields.Float(required=True)
+    latitude = mm.fields.Float(required=True)
+
+    @mm.post_load
+    def make_geo_stub(self, data: typing.Dict) -> test_models.GeoStub:
+        return test_models.GeoStub(
+            geo_stub_id=data.pop('geo_stub_id'),
+            longitude=data.pop('longitude'),
+            latitude=data.pop('latitude')
+        )
+
+
 class TestModelSchema(mm.Schema):
     test_id = mm.fields.Int(required=True)
     test_name = mm.fields.Str(required=True)
