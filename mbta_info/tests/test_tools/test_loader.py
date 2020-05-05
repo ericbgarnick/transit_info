@@ -1,3 +1,4 @@
+import pathlib
 from unittest import mock
 
 import pytest
@@ -110,3 +111,15 @@ def test_get_schema_for_table(db):
 
     # THEN
     assert isinstance(loader.get_schema_for_table(table_name), expected_schema)
+
+
+def test_get_data_file_path(db):
+    # GIVEN
+    table_name = "test_model"
+    expected_path = pathlib.Path(pathlib.Path(__name__).cwd(), f"mbta_info/data/{table_name}s.txt")
+
+    # WHEN
+    loader = Loader(db)
+
+    # THEN
+    assert loader.get_data_file_path(table_name) == expected_path
