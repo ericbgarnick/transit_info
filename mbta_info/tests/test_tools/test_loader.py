@@ -6,6 +6,8 @@ import typing
 from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr.tools.loader import Loader
+from mbta_info.tests import models as test_models
+from mbta_info.tests import schemas as test_schemas
 
 
 class TableStub:
@@ -84,3 +86,27 @@ def test_commit_batch_failure(db, monkeypatch):
     db.session.commit.assert_called_once()
     db.session.rollback.assert_called_once()
     db.session.close.assert_called_once()
+
+
+def test_get_model_for_table(db):
+    # GIVEN
+    table_name = "test_model"
+    expected_model = test_models.TestModel
+
+    # WHEN
+    loader = Loader(db)
+
+    # THEN
+    assert loader.get_model_for_table(table_name) is expected_model
+
+
+def test_get_schema_for_table(db):
+    # GIVEN
+    table_name = "test_model"
+    expected_schema = test_schemas.TestModelSchema
+
+    # WHEN
+    loader = Loader(db)
+
+    # THEN
+    assert isinstance(loader.get_schema_for_table(table_name), expected_schema)

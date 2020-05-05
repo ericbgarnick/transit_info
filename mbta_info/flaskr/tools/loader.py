@@ -23,7 +23,8 @@ class Loader:
         for table_name in self.table_names:
             print(f"Loading data for {table_name} table")
 
-            model, model_schema = self.get_model_and_schema(table_name)
+            model = self.get_model_for_table(table_name)
+            model_schema = self.get_schema_for_table(table_name)
 
             model_pk_field = inspect(model).primary_key[0].name
             existing_pks = {
@@ -47,14 +48,18 @@ class Loader:
                 self.commit_batch(last_batch=True)
 
     @staticmethod
-    def get_model_and_schema(table_name: str) -> typing.Tuple[Model, Schema]:
+    def get_model_for_table(table_name: str) -> Model:
         models = importlib.import_module(g.config['import_dir'] + ".models")
+
+        model_name = model_name_from_table_name(table_name)
+        return getattr(models, model_name)
+
+    @staticmethod
+    def get_schema_for_table(table_name: str) -> Schema:
         schemas = importlib.import_module(g.config['import_dir'] + ".schemas")
 
         model_name = model_name_from_table_name(table_name)
-        model_schema = getattr(schemas, model_name + "Schema")()  # type: Schema
-        model = getattr(models, model_name)
-        return model, model_schema
+        return getattr(schemas, model_name + "Schema")()  # type: Schema
 
     @staticmethod
     def get_data_file_path(table_name: str) -> str:
