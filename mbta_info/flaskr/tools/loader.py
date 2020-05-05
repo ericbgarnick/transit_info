@@ -15,11 +15,9 @@ from mbta_info.flaskr.tools.utils import model_name_from_table_name
 class Loader:
     def __init__(self, db: SQLAlchemy, max_batch_size: int = 100000):
         self.db = db
-        print("DB:", db)
         db.create_all()
         self.max_batch_size = max_batch_size
         self.table_names = [table.name for table in self.db.metadata.sorted_tables]
-        print("TABLE NAMES:", self.table_names)
 
     def load_data(self):
         for table_name in self.table_names:
@@ -38,15 +36,15 @@ class Loader:
                 reader = csv.DictReader(f_in)
                 cur_batch_size = 0
                 for data_row in reader:
-                    cur_batch_size += self._update_or_create_object(
+                    cur_batch_size += self.update_or_create_object(
                         model, model_schema, model_pk_field, existing_pks, data_row
                     )
                     if cur_batch_size == self.max_batch_size:
-                        self._commit_batch()
+                        self.commit_batch()
                         print(f"Loaded {cur_batch_size} rows from {data_file_path}")
                         cur_batch_size = 0
                 # Commit last batch
-                self._commit_batch(last_batch=True)
+                self.commit_batch(last_batch=True)
 
     @staticmethod
     def get_model_and_schema(table_name: str) -> typing.Tuple[Model, Schema]:
@@ -68,7 +66,7 @@ class Loader:
         data_file_name = data_files[table_name]
         return Path(data_path, data_file_name)
 
-    def _update_or_create_object(
+    def update_or_create_object(
         self,
         model: Model,
         model_schema: Schema,
@@ -100,7 +98,7 @@ class Loader:
             print(data_row)
             raise e
 
-    def _commit_batch(self, last_batch: bool = False):
+    def commit_batch(self, last_batch: bool = False):
         try:
             self.db.session.commit()
             if last_batch:
