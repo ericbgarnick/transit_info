@@ -1,7 +1,9 @@
+import json
 import pathlib
 from unittest import mock
 
 import pytest
+import marshmallow as mm
 
 from sqlalchemy.exc import DataError
 
@@ -186,3 +188,23 @@ def test_update_or_create_object_existing_obj(db):
             assert created_test_model.test_type == test_models.TestType.type_1
         else:
             assert getattr(created_test_model, key) == value
+
+
+def test_update_or_create_object_bad_data(db, capsys):
+    """Assert that given bad data, an exception is raised and the received data row is printed"""
+    model = test_models.TestModel
+    schema = test_schemas.TestModelSchema()
+    model_pk_field = "test_id"
+    existing_pks = set()
+    data_row = {
+        "test_id": "a",
+        "test_name": "test_name",
+        "test_type": "0",
+    }
+
+    loader = Loader(db)
+    with pytest.raises(mm.ValidationError):
+        loader.update_or_create_object(model, schema, model_pk_field, existing_pks, data_row)
+
+    assert db.session.query(model).count() == 0
+    assert capsys.readouterr().out.strip() == json.dumps(data_row, sort_keys=True, indent=4)

@@ -1,5 +1,6 @@
 import csv
 import importlib
+import json
 from pathlib import Path
 import typing
 
@@ -100,7 +101,7 @@ class Loader:
                     return 1
             return 0
         except (ValidationError, KeyError) as e:
-            print(data_row)
+            print(json.dumps(data_row, sort_keys=True, indent=4))
             raise e
 
     def commit_batch(self, last_batch: bool = False):
