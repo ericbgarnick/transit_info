@@ -1,0 +1,11 @@
+[run]
+include =
+    mbta_info/flaskr/*
+dynamic_context = test_function
+
+[report]
+include =
+    mbta_info/flaskr/*
+
+[html]
+show_contexts = true

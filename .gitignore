@@ -3,3 +3,5 @@ venv
 __pycache__/
 .mypy_cache/
 mbta_info/data
+templates/
+.coverage
