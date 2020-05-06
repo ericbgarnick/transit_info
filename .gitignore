@@ -5,3 +5,4 @@ __pycache__/
 mbta_info/data
 templates/
 .coverage
+htmlcov/
