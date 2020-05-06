@@ -1,4 +1,5 @@
 [run]
+branch = true
 include =
     mbta_info/flaskr/*
 dynamic_context = test_function

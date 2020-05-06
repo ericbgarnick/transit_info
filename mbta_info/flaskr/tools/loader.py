@@ -97,7 +97,7 @@ class Loader:
                 else:
                     # Create new
                     self.db.session.add(model_instance)
-                return 1
+                    return 1
             return 0
         except (ValidationError, KeyError) as e:
             print(data_row)
