@@ -135,3 +135,32 @@ def test_get_data_file_path(db):
 
     # THEN
     assert loader.get_data_file_path(table_name) == expected_path
+
+
+def test_update_or_create_object_new_obj_empty_table(db):
+    """Assert that given good data, a new object is successfully created"""
+    geo_stub = test_models.GeoStub(1, 10.1, 20.2)
+    db.session.add(geo_stub)
+    db.session.commit()
+
+    model = test_models.TestModel
+    schema = test_schemas.TestModelSchema()
+    model_pk_field = "test_id"
+    existing_pks = set()
+    data_row = {
+        "test_id": 1,
+        "test_name": "test_name",
+        "test_type": '0',
+        "test_dist": 0.5,
+        "geo_stub_id": geo_stub.geo_stub_id
+    }
+
+    loader = Loader(db)
+    assert loader.update_or_create_object(model, schema, model_pk_field, existing_pks, data_row) == 1
+
+    created_test_model = db.session.query(model).first()  # type: test_models.TestModel
+    for key, value in data_row.items():
+        if key == "test_type":
+            assert created_test_model.test_type == test_models.TestType.type_0
+        else:
+            assert getattr(created_test_model, key) == value

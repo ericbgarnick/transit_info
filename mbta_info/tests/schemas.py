@@ -12,7 +12,7 @@ class GeoStubSchema(mm.Schema):
     latitude = mm.fields.Float(required=True)
 
     @mm.post_load
-    def make_geo_stub(self, data: typing.Dict) -> test_models.GeoStub:
+    def make_geo_stub(self, data: typing.Dict, **kwargs) -> test_models.GeoStub:
         return test_models.GeoStub(
             geo_stub_id=data.pop("geo_stub_id"),
             longitude=data.pop("longitude"),
@@ -33,7 +33,7 @@ class TestModelSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_test_model(self, data: typing.Dict) -> test_models.TestModel:
+    def make_test_model(self, data: typing.Dict, **kwargs) -> test_models.TestModel:
         return test_models.TestModel(
             data.pop("test_id"), data.pop("test_name"), data.pop("test_type"), **data
         )
