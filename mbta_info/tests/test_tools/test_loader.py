@@ -126,6 +126,7 @@ def test_get_data_file_path(db):
 
 def test_update_or_create_object_new_obj(db):
     """Assert that given good data, a new object is successfully created"""
+    # GIVEN
     geo_stub = test_models.GeoStub(1, 10.1, 20.2)
     db.session.add(geo_stub)
     db.session.commit()
@@ -142,10 +143,13 @@ def test_update_or_create_object_new_obj(db):
         "geo_stub_id": geo_stub.geo_stub_id,
     }
 
+    # WHEN
     loader = Loader(db)
     created_objects = loader.update_or_create_object(
         model, schema, model_pk_field, existing_pks, data_row
     )
+
+    # THEN
     assert created_objects == 1
 
     created_test_model = db.session.query(model).first()  # type: test_models.TestModel
@@ -158,6 +162,7 @@ def test_update_or_create_object_new_obj(db):
 
 def test_update_or_create_object_existing_obj(db):
     """Assert that given good data, an existing object is successfully updated"""
+    # GIVEN
     geo_stub = test_models.GeoStub(1, 10.1, 20.2)
     existing_test_model = test_models.TestModel(1, "old_test_name", test_models.TestType.type_0)
     db.session.add(geo_stub)
@@ -176,10 +181,13 @@ def test_update_or_create_object_existing_obj(db):
         "geo_stub_id": geo_stub.geo_stub_id,  # Fill blank value
     }
 
+    # WHEN
     loader = Loader(db)
     created_objects = loader.update_or_create_object(
         model, schema, model_pk_field, existing_pks, data_row
     )
+
+    # THEN
     assert created_objects == 0
 
     created_test_model = db.session.query(model).first()  # type: test_models.TestModel
@@ -192,6 +200,7 @@ def test_update_or_create_object_existing_obj(db):
 
 def test_update_or_create_object_bad_data(db, capsys):
     """Assert that given bad data, an exception is raised and the received data row is printed"""
+    # GIVEN
     model = test_models.TestModel
     schema = test_schemas.TestModelSchema()
     model_pk_field = "test_id"
@@ -202,9 +211,26 @@ def test_update_or_create_object_bad_data(db, capsys):
         "test_type": "0",
     }
 
+    # WHEN
     loader = Loader(db)
     with pytest.raises(mm.ValidationError):
         loader.update_or_create_object(model, schema, model_pk_field, existing_pks, data_row)
 
+    # THEN
     assert db.session.query(model).count() == 0
     assert capsys.readouterr().out.strip() == json.dumps(data_row, sort_keys=True, indent=4)
+
+
+def test_update_or_create_object_full_run(db, monkeypatch, capsys):
+    """Test that data is successfully loaded from files."""
+    # GIVEN
+    test_tables = {k: v for k, v in db.metadata.tables.items() if v.name in ["geo_stub", "test_model"]}
+    monkeypatch.setattr(db.metadata, "tables", test_tables)
+
+    # WHEN
+    loader = Loader(db, max_batch_size=2)
+    loader.load_data()
+
+    # THEN
+    assert db.session.query(test_models.GeoStub).count() == 2
+    assert db.session.query(test_models.TestModel).count() == 5
