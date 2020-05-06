@@ -2,27 +2,12 @@ import pathlib
 from unittest import mock
 
 import pytest
-import typing
 
 from sqlalchemy.exc import DataError
 
 from mbta_info.flaskr.tools.loader import Loader
 from mbta_info.tests import models as test_models
 from mbta_info.tests import schemas as test_schemas
-
-
-class TableStub:
-    def __init__(self, name: str):
-        self.name = name
-
-
-class DbStub:
-    class MetaData:
-        def __init__(self, tables: typing.List[TableStub]):
-            self.sorted_tables = tables
-
-    def __init__(self, tables: typing.List[TableStub]):
-        self.metadata = self.MetaData(tables)
 
 
 @pytest.mark.parametrize(
@@ -150,13 +135,16 @@ def test_update_or_create_object_new_obj_empty_table(db):
     data_row = {
         "test_id": 1,
         "test_name": "test_name",
-        "test_type": '0',
+        "test_type": "0",
         "test_dist": 0.5,
-        "geo_stub_id": geo_stub.geo_stub_id
+        "geo_stub_id": geo_stub.geo_stub_id,
     }
 
     loader = Loader(db)
-    assert loader.update_or_create_object(model, schema, model_pk_field, existing_pks, data_row) == 1
+    created_objects = loader.update_or_create_object(
+        model, schema, model_pk_field, existing_pks, data_row
+    )
+    assert created_objects == 1
 
     created_test_model = db.session.query(model).first()  # type: test_models.TestModel
     for key, value in data_row.items():
