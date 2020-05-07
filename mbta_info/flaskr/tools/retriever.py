@@ -54,7 +54,7 @@ class Retriever:
     def validate_zipfile_contents(self, zf: zipfile.ZipFile):
         retrieved_filenames = set(zf.namelist())
         if self.verbose:
-            print("RETRIEVED:", retrieved_filenames)
+            print("RETRIEVED:", sorted(retrieved_filenames))
         for filename in self.config["mbta_data"]["files"].values():
             if self.verbose:
                 print("CHECKING FILE:", filename)
