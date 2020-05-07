@@ -65,4 +65,13 @@ def test_retriever_fetch_zipfile_failure(monkeypatch):
 
 
 def test_retriever_validate_zipfile_contents():
-    pass
+    # GIVEN
+    test_zf = ZipFileStub()
+
+    # WHEN
+    retriever = Retriever(verbose=False)
+    retriever.validate_zipfile_contents(test_zf)
+
+    # THEN
+    assert not retriever.missing_filenames
+    assert not retriever.errors

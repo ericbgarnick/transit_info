@@ -1,4 +1,3 @@
-import sys
 import zipfile
 import io
 import pathlib
@@ -6,21 +5,18 @@ import typing
 
 import requests
 
-try:
-    from mbta_info.config import Config
-except ModuleNotFoundError:
-    sys.path.append(str(pathlib.Path(__name__).absolute().parent))
-    from mbta_info.config import Config
-
 
 class Retriever:
     """Retrieve GTFS data files from a remote server and save locally"""
 
     CONNECT_TIMEOUT = 3.1
     READ_TIMEOUT = 6.2
-    config = Config().config
+
+    config: typing.ClassVar[typing.Dict]
 
     def __init__(self, verbose=True):
+        self.load_config()
+
         self.verbose = verbose
         self.data_url: str = self.config["mbta_data"]["files_url"]
         self.local_data_path = pathlib.Path(
@@ -36,6 +32,12 @@ class Retriever:
             self.extract_zipfile_contents(zf)
         else:
             self.report_errors()
+
+    def load_config(self):
+        # FLASK_ENV at runtime may be different from load time
+        from mbta_info.config import Config
+
+        self.config = Config().config
 
     def fetch_zipfile(self) -> zipfile.ZipFile:
         try:
