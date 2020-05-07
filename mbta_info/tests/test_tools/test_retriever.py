@@ -18,6 +18,9 @@ class ZipFileStub:
     def namelist(self) -> typing.List[str]:
         return self._namelist
 
+    def extractall(self):
+        pass
+
 
 def test_init():
     # GIVEN
@@ -95,3 +98,16 @@ def test_validate_zipfile_contents_missing_file():
     # THEN
     assert retriever.missing_filenames == {"test_models.txt", }
     assert retriever.errors == ["Missing data files"]
+
+
+def test_extract_zipfile_contents(monkeypatch):
+    # GIVEN
+    test_zf = ZipFileStub()
+    monkeypatch.setattr(test_zf, "extractall", mock.Mock())
+
+    # WHEN
+    retriever = Retriever()
+    retriever.extract_zipfile_contents(test_zf)
+
+    # THEN
+    test_zf.extractall.assert_called_with(retriever.local_data_path)
