@@ -68,10 +68,7 @@ def test_commit_batch_success(last_batch, expected_calls, db, monkeypatch):
 def test_commit_batch_failure(db, monkeypatch):
     """Assert rollback() and close() called and error re-raised when a DataError occurs"""
     # GIVEN
-    def raise_data_error():
-        raise DataError(None, None, None)
-
-    monkeypatch.setattr(db.session, "commit", mock.Mock(side_effect=raise_data_error))
+    monkeypatch.setattr(db.session, "commit", mock.Mock(side_effect=DataError(None, None, None)))
     monkeypatch.setattr(db.session, "rollback", mock.Mock())
     monkeypatch.setattr(db.session, "close", mock.Mock())
 
