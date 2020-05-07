@@ -18,8 +18,7 @@ class Retriever:
     def __init__(self):
         self.data_url: str = self.config["mbta_data"]["files_url"]
         self.local_data_path = pathlib.Path(
-            pathlib.Path(__name__).absolute().parent,
-            self.config["mbta_data"]["path"],
+            pathlib.Path(__name__).absolute().parent, self.config["mbta_data"]["path"],
         )
         self.errors = []
         self.missing_filenames: typing.Set[str] = set()
@@ -35,8 +34,7 @@ class Retriever:
     def fetch_zipfile(self) -> zipfile.ZipFile:
         try:
             response = requests.get(
-                self.data_url,
-                timeout=(self.CONNECT_TIMEOUT, self.READ_TIMEOUT)
+                self.data_url, timeout=(self.CONNECT_TIMEOUT, self.READ_TIMEOUT)
             )
             compressed_data = io.BytesIO(response.content)
             return zipfile.ZipFile(compressed_data)

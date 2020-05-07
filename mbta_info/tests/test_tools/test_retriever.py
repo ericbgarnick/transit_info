@@ -36,8 +36,7 @@ def test_retriever_fetch_zipfile_success(monkeypatch):
 
     # THEN
     requests.get.assert_called_with(
-        retriever.data_url,
-        timeout=(retriever.CONNECT_TIMEOUT, retriever.READ_TIMEOUT)
+        retriever.data_url, timeout=(retriever.CONNECT_TIMEOUT, retriever.READ_TIMEOUT)
     )
     assert zipfile.ZipFile.call_args[0][0].read() == response_stub.content
     assert result == unzipped
@@ -45,7 +44,9 @@ def test_retriever_fetch_zipfile_success(monkeypatch):
 
 def test_retriever_fetch_zipfile_failure(monkeypatch):
     # GIVEN
-    monkeypatch.setattr(requests, "get", mock.Mock(side_effect=requests.exceptions.ConnectionError))
+    monkeypatch.setattr(
+        requests, "get", mock.Mock(side_effect=requests.exceptions.ConnectionError)
+    )
 
     # WHEN
     retriever = Retriever()

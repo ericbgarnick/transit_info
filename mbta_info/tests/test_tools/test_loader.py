@@ -68,7 +68,9 @@ def test_commit_batch_success(last_batch, expected_calls, db, monkeypatch):
 def test_commit_batch_failure(db, monkeypatch):
     """Assert rollback() and close() called and error re-raised when a DataError occurs"""
     # GIVEN
-    monkeypatch.setattr(db.session, "commit", mock.Mock(side_effect=DataError(None, None, None)))
+    monkeypatch.setattr(
+        db.session, "commit", mock.Mock(side_effect=DataError(None, None, None))
+    )
     monkeypatch.setattr(db.session, "rollback", mock.Mock())
     monkeypatch.setattr(db.session, "close", mock.Mock())
 
@@ -161,7 +163,9 @@ def test_update_or_create_object_existing_obj(db):
     """Assert that given good data, an existing object is successfully updated"""
     # GIVEN
     geo_stub = test_models.GeoStub(1, 10.1, 20.2)
-    existing_test_model = test_models.TestModel(1, "old_test_name", test_models.TestType.type_0)
+    existing_test_model = test_models.TestModel(
+        1, "old_test_name", test_models.TestType.type_0
+    )
     db.session.add(geo_stub)
     db.session.add(existing_test_model)
     db.session.commit()
@@ -169,12 +173,14 @@ def test_update_or_create_object_existing_obj(db):
     model = test_models.TestModel
     schema = test_schemas.TestModelSchema()
     model_pk_field = "test_id"
-    existing_pks = {1, }
+    existing_pks = {
+        1,
+    }
     data_row = {
         "test_id": 1,
-        "test_name": "new_test_name",         # change from "old_test_name"
-        "test_type": "1",                     # change from type_0
-        "test_dist": 0.5,                     # Fill blank value
+        "test_name": "new_test_name",  # change from "old_test_name"
+        "test_type": "1",  # change from type_0
+        "test_dist": 0.5,  # Fill blank value
         "geo_stub_id": geo_stub.geo_stub_id,  # Fill blank value
     }
 
@@ -211,11 +217,15 @@ def test_update_or_create_object_bad_data(db, capsys):
     # WHEN
     loader = Loader(db)
     with pytest.raises(mm.ValidationError):
-        loader.update_or_create_object(model, schema, model_pk_field, existing_pks, data_row)
+        loader.update_or_create_object(
+            model, schema, model_pk_field, existing_pks, data_row
+        )
 
     # THEN
     assert db.session.query(model).count() == 0
-    assert capsys.readouterr().out.strip() == json.dumps(data_row, sort_keys=True, indent=4)
+    assert capsys.readouterr().out.strip() == json.dumps(
+        data_row, sort_keys=True, indent=4
+    )
 
 
 def test_update_or_create_object_full_run(db, monkeypatch, capsys):
