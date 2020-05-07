@@ -114,7 +114,7 @@ def test_get_data_file_path(db):
     # GIVEN
     table_name = "test_model"
     expected_path = pathlib.Path(
-        pathlib.Path(__name__).cwd(), f"mbta_info/data/{table_name}s.txt"
+        pathlib.Path(__name__).absolute().parent, f"mbta_info/data/{table_name}s.txt"
     )
 
     # WHEN

@@ -13,7 +13,7 @@ class Config:
             raise RuntimeError("No FLASK_ENV value set!")
 
         self._config_file = pathlib.Path(
-            pathlib.Path(__name__).cwd(), "mbta_info", f"config_{self._flask_env}.yaml"
+            pathlib.Path(__name__).absolute().parent, "mbta_info", f"config_{self._flask_env}.yaml"
         )
 
         self._config = yaml.load(open(self._config_file, "r"), yaml.Loader)

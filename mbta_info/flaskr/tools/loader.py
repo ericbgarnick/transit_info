@@ -68,7 +68,7 @@ class Loader:
     def get_data_file_path(table_name: str) -> str:
         data_files = g.config["mbta_data"]["files"]
         data_path = Path(
-            Path(__name__).cwd(), g.config["mbta_data"]["path"]
+            Path(__name__).absolute().parent, g.config["mbta_data"]["path"]
         )
 
         data_file_name = data_files[table_name]
