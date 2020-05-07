@@ -11,6 +11,8 @@ from mbta_info.config import Config
 class Retriever:
     """Retrieve GTFS data files from a remote server and save locally"""
 
+    CONNECT_TIMEOUT = 3.1
+    READ_TIMEOUT = 6.2
     config = Config().config
 
     def __init__(self):
@@ -23,24 +25,25 @@ class Retriever:
         self.missing_filenames: typing.Set[str] = set()
 
     def retrieve_data(self):
-        zf = self._fetch_zipfile()
-        self._validate_zipfile_contents(zf)
+        zf = self.fetch_zipfile()
+        self.validate_zipfile_contents(zf)
         if not self.errors:
-            self._extract_zipfile_contents(zf)
+            self.extract_zipfile_contents(zf)
         else:
-            self._report_errors()
+            self.report_errors()
 
-    def _fetch_zipfile(self) -> zipfile.ZipFile:
+    def fetch_zipfile(self) -> zipfile.ZipFile:
         try:
             response = requests.get(
-                self.data_url, timeout=(3.1, 6.2)  # (connect, read)
+                self.data_url,
+                timeout=(self.CONNECT_TIMEOUT, self.READ_TIMEOUT)
             )
             compressed_data = io.BytesIO(response.content)
             return zipfile.ZipFile(compressed_data)
         except requests.exceptions.ConnectionError:
             self.errors.append(f"ConnectionError for {self.data_url}")
 
-    def _validate_zipfile_contents(self, zf: zipfile.ZipFile):
+    def validate_zipfile_contents(self, zf: zipfile.ZipFile):
         retrieved_filenames = set(zf.namelist())
         for filename in self.config["mbta_data"]["files"]:
             if filename not in retrieved_filenames:
@@ -48,10 +51,10 @@ class Retriever:
         if self.missing_filenames:
             self.errors.append("Missing data files")
 
-    def _extract_zipfile_contents(self, zf: zipfile.ZipFile):
+    def extract_zipfile_contents(self, zf: zipfile.ZipFile):
         zf.extractall(self.local_data_path)
 
-    def _report_errors(self):
+    def report_errors(self):
         print("BAD STUFF HAPPENED")
 
 
