@@ -224,7 +224,8 @@ def test_update_or_create_object_bad_data(db, capsys):
 def test_update_or_create_object_full_run(db, monkeypatch, capsys):
     """Test that data is successfully loaded from files."""
     # GIVEN
-    test_tables = {k: v for k, v in db.metadata.tables.items() if v.name in ["geo_stub", "test_model"]}
+    model_names = ["geo_stub", "test_model"]
+    test_tables = {k: v for k, v in db.metadata.tables.items() if v.name in model_names}
     monkeypatch.setattr(db.metadata, "tables", test_tables)
 
     # WHEN
@@ -234,3 +235,7 @@ def test_update_or_create_object_full_run(db, monkeypatch, capsys):
     # THEN
     assert db.session.query(test_models.GeoStub).count() == 2
     assert db.session.query(test_models.TestModel).count() == 5
+    captured = capsys.readouterr().out.strip()
+    for model_name in model_names:
+        assert f"Loading data for {model_name} table" in captured
+        assert f"transit_info/mbta_info/data/{model_name}s.txt" in captured

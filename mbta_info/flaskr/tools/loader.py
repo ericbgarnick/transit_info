@@ -47,6 +47,8 @@ class Loader:
                         cur_batch_size = 0
                 # Commit last batch
                 self.commit_batch(last_batch=True)
+                if cur_batch_size:
+                    print(f"Loaded {cur_batch_size} rows from {data_file_path}")
 
     @staticmethod
     def get_model_for_table(table_name: str) -> Model:
