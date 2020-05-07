@@ -111,3 +111,40 @@ def test_extract_zipfile_contents(monkeypatch):
 
     # THEN
     test_zf.extractall.assert_called_with(retriever.local_data_path)
+
+
+def test_retrieve_data_success(monkeypatch):
+    # GIVEN
+    test_contents = b"test"
+    retriever = Retriever()
+    monkeypatch.setattr(retriever, "fetch_zipfile", mock.Mock(return_value=test_contents))
+    monkeypatch.setattr(retriever, "validate_zipfile_contents", mock.Mock())
+    monkeypatch.setattr(retriever, "extract_zipfile_contents", mock.Mock())
+
+    # WHEN
+    retriever.retrieve_data()
+
+    # THEN
+    retriever.fetch_zipfile.assert_called_once()
+    retriever.validate_zipfile_contents.assert_called_with(test_contents)
+    retriever.extract_zipfile_contents.assert_called_with(test_contents)
+
+
+def test_retrieve_data_failure(monkeypatch):
+    # GIVEN
+    test_contents = b"test"
+    retriever = Retriever()
+    monkeypatch.setattr(retriever, "fetch_zipfile", mock.Mock(return_value=test_contents))
+    monkeypatch.setattr(retriever, "validate_zipfile_contents", mock.Mock())
+    monkeypatch.setattr(retriever, "extract_zipfile_contents", mock.Mock())
+    monkeypatch.setattr(retriever, "report_errors", mock.Mock())
+    retriever.errors.append("error")
+
+    # WHEN
+    retriever.retrieve_data()
+
+    # THEN
+    retriever.fetch_zipfile.assert_called_once()
+    retriever.validate_zipfile_contents.assert_called_with(test_contents)
+    retriever.extract_zipfile_contents.assert_not_called()
+    retriever.report_errors.assert_called_once()
