@@ -1,3 +1,4 @@
+import sys
 import zipfile
 import io
 import pathlib
@@ -5,7 +6,11 @@ import typing
 
 import requests
 
-from mbta_info.config import Config
+try:
+    from mbta_info.config import Config
+except ModuleNotFoundError:
+    sys.path.append(str(pathlib.Path(__name__).absolute().parent))
+    from mbta_info.config import Config
 
 
 class Retriever:
@@ -15,7 +20,8 @@ class Retriever:
     READ_TIMEOUT = 6.2
     config = Config().config
 
-    def __init__(self):
+    def __init__(self, verbose=True):
+        self.verbose = verbose
         self.data_url: str = self.config["mbta_data"]["files_url"]
         self.local_data_path = pathlib.Path(
             pathlib.Path(__name__).absolute().parent, self.config["mbta_data"]["path"],
@@ -33,6 +39,8 @@ class Retriever:
 
     def fetch_zipfile(self) -> zipfile.ZipFile:
         try:
+            if self.verbose:
+                print("MAKING REQUEST TO:", self.data_url)
             response = requests.get(
                 self.data_url, timeout=(self.CONNECT_TIMEOUT, self.READ_TIMEOUT)
             )
@@ -43,7 +51,11 @@ class Retriever:
 
     def validate_zipfile_contents(self, zf: zipfile.ZipFile):
         retrieved_filenames = set(zf.namelist())
-        for filename in self.config["mbta_data"]["files"]:
+        if self.verbose:
+            print("RETRIEVED:", retrieved_filenames)
+        for filename in self.config["mbta_data"]["files"].values():
+            if self.verbose:
+                print("CHECKING FILE:", filename)
             if filename not in retrieved_filenames:
                 self.missing_filenames.add(filename)
         if self.missing_filenames:

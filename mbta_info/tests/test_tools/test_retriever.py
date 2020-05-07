@@ -1,5 +1,7 @@
 from unittest import mock
 
+import typing
+
 from mbta_info.config import Config
 from mbta_info.flaskr.tools.retriever import Retriever, requests, zipfile
 
@@ -7,6 +9,12 @@ from mbta_info.flaskr.tools.retriever import Retriever, requests, zipfile
 class ResponseStub:
     def __init__(self):
         self.content = b"content"
+
+
+class ZipFileStub:
+    @staticmethod
+    def namelist() -> typing.List[str]:
+        return ["geo_stubs.txt", "test_models.txt"]
 
 
 def test_retriever_init():
@@ -54,3 +62,7 @@ def test_retriever_fetch_zipfile_failure(monkeypatch):
 
     # THEN
     assert retriever.errors == [f"ConnectionError for {retriever.data_url}"]
+
+
+def test_retriever_validate_zipfile_contents():
+    pass
