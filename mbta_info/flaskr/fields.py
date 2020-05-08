@@ -11,7 +11,8 @@ class RouteId(mm.fields.String):
     """
 
     EMPTY_TABLE_MESSAGE = "No Routes loaded"
-    MISSING_ROUTE_MESSAGE = "Missing Route for route_id: {route_id}"
+    MISSING_ROUTE_BASE = "Missing Route for route_id"
+    MISSING_ROUTE_MESSAGE = MISSING_ROUTE_BASE + ": {route_id}"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,11 +30,6 @@ class RouteId(mm.fields.String):
     @staticmethod
     def is_missing_route_error(error: mm.ValidationError) -> bool:
         """Return True if the message for error matches RouteId.MISSING_ROUTE_MESSAGE. Otherwise return False."""
-        try:
-            err_message = error.normalized_messages().get("route_id", [""])[0]
-            err_message_start = " ".join(
-                err_message.split()[:-1]
-            )  # Drop route_id value
-            return RouteId.MISSING_ROUTE_MESSAGE.startswith(err_message_start)
-        except IndexError:
-            return False
+        err_message = [val[0] for val in error.normalized_messages().values()][0]
+        err_message_start = err_message.split(":")[0]  # Drop route_id value
+        return err_message_start == RouteId.MISSING_ROUTE_BASE
