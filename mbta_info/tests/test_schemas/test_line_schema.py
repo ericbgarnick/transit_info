@@ -14,7 +14,7 @@ def test_load_good_data():
         "line_url": "http://www.line.com",
         "line_color": "AAAAAA",
         "line_text_color": "FFFFFF",
-        "line_sort_order": 100,
+        "line_sort_order": "100",
     }
 
     # WHEN
@@ -23,14 +23,16 @@ def test_load_good_data():
     # THEN
     assert isinstance(line_obj, mbta_models.Line)
     for key, value in line_data.items():
+        if key == "line_sort_order":
+            value = int(value)
         assert getattr(line_obj, key) == value
 
 
 @pytest.mark.parametrize(
     "line_data_update",
     (
-        {"line_id": None},
-        {"line_long_name": None},
+        {"line_id": ""},
+        {"line_long_name": ""},
         {"line_url": "bad_url"},
         {"line_sort_order": "NAN"},
         {"bad_key": "anything"},
@@ -46,7 +48,7 @@ def test_load_bad_data(line_data_update):
         "line_url": "http://www.line.com",
         "line_color": "AAAAAA",
         "line_text_color": "FFFFFF",
-        "line_sort_order": 100,
+        "line_sort_order": "100",
     }
     line_data.update(line_data_update)
 

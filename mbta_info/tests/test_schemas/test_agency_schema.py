@@ -7,7 +7,7 @@ from mbta_info.flaskr import schemas, models as mbta_models
 def test_load_good_data():
     # GIVEN
     agency_data = {
-        "agency_id": 1,
+        "agency_id": "1",
         "agency_name": "Agency",
         "agency_url": "http://www.agency.com",
         "agency_timezone": "America/New_York",
@@ -25,6 +25,8 @@ def test_load_good_data():
             value = getattr(mbta_models.TimeZone, value.replace("/", "_"))
         elif key == "agency_lang":
             value = getattr(mbta_models.LangCode, value.lower())
+        elif key == "agency_id":
+            value = int(value)
         assert getattr(agency_obj, key) == value
 
 
@@ -32,7 +34,7 @@ def test_load_good_data():
     "agency_data_update",
     (
         {"agency_id": "NAN"},
-        {"agency_name": None},
+        {"agency_name": ""},
         {"agency_url": "bad_url"},
         {"agency_timezone": "bad_timezone"},
         {"agency_lang": "bad_lang"},
@@ -42,7 +44,7 @@ def test_load_good_data():
 def test_load_bad_data(agency_data_update):
     # GIVEN
     agency_data = {
-        "agency_id": 1,
+        "agency_id": "1",
         "agency_name": "Agency",
         "agency_url": "http://www.agency.com",
         "agency_timezone": "America/New_York",
