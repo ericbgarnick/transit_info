@@ -9,7 +9,7 @@ def test_validate_good_data():
         "agency_url": "http://www.agency.com",
         "agency_timezone": "America/New_York",
         "agency_lang": "EN",
-        "agency_phone": "555-555-5555"
+        "agency_phone": "555-555-5555",
     }
 
     # WHEN

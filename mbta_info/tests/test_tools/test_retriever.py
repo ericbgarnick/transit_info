@@ -96,7 +96,9 @@ def test_validate_zipfile_contents_missing_file():
     retriever.validate_zipfile_contents(test_zf)
 
     # THEN
-    assert retriever.missing_filenames == {"test_models.txt", }
+    assert retriever.missing_filenames == {
+        "test_models.txt",
+    }
     assert retriever.errors == ["Missing data files"]
 
 
@@ -117,7 +119,9 @@ def test_retrieve_data_success(monkeypatch):
     # GIVEN
     test_contents = b"test"
     retriever = Retriever()
-    monkeypatch.setattr(retriever, "fetch_zipfile", mock.Mock(return_value=test_contents))
+    monkeypatch.setattr(
+        retriever, "fetch_zipfile", mock.Mock(return_value=test_contents)
+    )
     monkeypatch.setattr(retriever, "validate_zipfile_contents", mock.Mock())
     monkeypatch.setattr(retriever, "extract_zipfile_contents", mock.Mock())
 
@@ -134,7 +138,9 @@ def test_retrieve_data_failure(monkeypatch):
     # GIVEN
     test_contents = b"test"
     retriever = Retriever()
-    monkeypatch.setattr(retriever, "fetch_zipfile", mock.Mock(return_value=test_contents))
+    monkeypatch.setattr(
+        retriever, "fetch_zipfile", mock.Mock(return_value=test_contents)
+    )
     monkeypatch.setattr(retriever, "validate_zipfile_contents", mock.Mock())
     monkeypatch.setattr(retriever, "extract_zipfile_contents", mock.Mock())
     monkeypatch.setattr(retriever, "report_errors", mock.Mock())

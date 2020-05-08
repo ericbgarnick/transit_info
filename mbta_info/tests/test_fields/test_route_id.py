@@ -6,7 +6,9 @@ from mbta_info.flaskr import fields, models as mbta_models
 
 @pytest.fixture
 def agency(db) -> mbta_models.Agency:
-    agency_obj = mbta_models.Agency(1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York)
+    agency_obj = mbta_models.Agency(
+        1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York
+    )
     db.session.add(agency_obj)
     db.session.commit()
     return agency_obj
@@ -15,7 +17,9 @@ def agency(db) -> mbta_models.Agency:
 def test_deserialize_success(db, agency):
     # GIVEN
     route_id = "Test Route"
-    route = mbta_models.Route(route_id, agency.agency_id, "Test Route Name", mbta_models.RouteType.type_0)
+    route = mbta_models.Route(
+        route_id, agency.agency_id, "Test Route Name", mbta_models.RouteType.type_0
+    )
     db.session.add(route)
     db.session.commit()
     route_id_field = fields.RouteId()
@@ -27,7 +31,9 @@ def test_deserialize_success(db, agency):
 def test_deserialize_bad_route_id(db, agency):
     # GIVEN
     route_id = "Test Route"
-    route = mbta_models.Route(route_id, agency.agency_id, "Test Route Name", mbta_models.RouteType.type_0)
+    route = mbta_models.Route(
+        route_id, agency.agency_id, "Test Route Name", mbta_models.RouteType.type_0
+    )
     db.session.add(route)
     db.session.commit()
     route_id_field = fields.RouteId()
