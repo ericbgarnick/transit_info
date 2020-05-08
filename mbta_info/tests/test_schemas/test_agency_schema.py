@@ -31,7 +31,7 @@ def test_load_good_data():
 @pytest.mark.parametrize(
     "agency_data_update",
     (
-        {"agency_id": "a"},
+        {"agency_id": "NAN"},
         {"agency_name": None},
         {"agency_url": "bad_url"},
         {"agency_timezone": "bad_timezone"},
