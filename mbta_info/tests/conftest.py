@@ -26,10 +26,11 @@ def app(set_test_env):
     app = create_app()
     with app.app_context():
         set_g()
+        project_db.drop_all()  # Make sure nothing was left around from an aborted test
         project_db.create_all()
         yield app
         project_db.session.close()
-        project_db.drop_all()
+        project_db.drop_all()  # Clean up after ourselves
 
 
 @pytest.fixture

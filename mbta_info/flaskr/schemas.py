@@ -245,16 +245,19 @@ class DirectionSchema(mm.Schema):
 
 class RoutePatternSchema(mm.Schema):
     route_pattern_id = mm.fields.Str(required=True)
-    route_id = mm.fields.Str(required=True)
+    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
     direction_id = mm.fields.Int()
     route_pattern_name = mm.fields.Str()
     route_pattern_time_desc = mm.fields.Str()
-    route_pattern_typicality = mm.fields.Int()
+    route_pattern_typicality = EnumField(mbta_models.TypicalityType)
     route_pattern_sort_order = mm.fields.Int()
     representative_trip_id = mm.fields.Str()
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        in_data["route_pattern_typicality"] = schema_utils.numbered_type_enum_key(
+            in_data["route_pattern_typicality"]
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load

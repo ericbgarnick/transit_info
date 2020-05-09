@@ -1,3 +1,4 @@
+"""Reference for fields and values at https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md"""
 import datetime
 import enum
 import logging
@@ -370,6 +371,14 @@ class Direction(db.Model):
         return f"<Direction: {self.route_id} ({self.direction} -> {self.direction_destination})>"
 
 
+class TypicalityType(enum.Enum):
+    type_0 = "not_defined"
+    type_1 = "typical"  # Usually 1 pattern per route, occasionally 2, rarely more
+    type_2 = "deviation"
+    type_3 = "highly_atypical"  # e.g. special routing that only runs a few times per day
+    type_4 = "diversion"  # e.g. planned detour, bus shuttle, snow route
+
+
 class RoutePattern(db.Model):
     """
     For a given route, each pair of start and end stops generally has 2 RoutePatterns - one going each direction
@@ -386,7 +395,7 @@ class RoutePattern(db.Model):
     direction_id = db.Column(db.SmallInteger, nullable=True)  # 0 or 1
     route_pattern_name = db.Column(db.String(128), nullable=True)
     route_pattern_time_desc = db.Column(db.String(32), nullable=True)
-    route_pattern_typicality = db.Column(db.Integer, nullable=True)
+    route_pattern_typicality = db.Column(db.Enum(TypicalityType), nullable=True)
     route_pattern_sort_order = db.Column(db.Integer, nullable=True)
     representative_trip_id = db.Column(
         db.String(128), nullable=True
