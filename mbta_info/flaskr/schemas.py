@@ -69,7 +69,7 @@ class RouteSchema(mm.Schema):
     route_text_color = mm.fields.Str()
     route_sort_order = mm.fields.Int()
     route_fare_class = EnumField(mbta_models.FareClass)
-    line_id = mm.fields.Str()
+    line_id = mbta_fields.StringForeignKey(mbta_models.Line)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
