@@ -39,9 +39,7 @@ def db(app):
 
 @pytest.fixture
 def geo_stub(db) -> test_models.GeoStub:
-    geo_stub_obj = test_models.GeoStub(
-        1, 100.1, 200.2
-    )
+    geo_stub_obj = test_models.GeoStub(1, 100.1, 200.2)
     db.session.add(geo_stub_obj)
     db.session.commit()
     return geo_stub_obj
@@ -63,10 +61,7 @@ def test_model(db, geo_stub) -> test_models.TestModel:
 @pytest.fixture
 def agency(db) -> mbta_models.Agency:
     agency_obj = mbta_models.Agency(
-        1,
-        "Agency",
-        "http://www.agency.com",
-        mbta_models.TimeZone.America_New_York
+        1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York
     )
     db.session.add(agency_obj)
     db.session.commit()
@@ -75,9 +70,7 @@ def agency(db) -> mbta_models.Agency:
 
 @pytest.fixture
 def line(db) -> mbta_models.Line:
-    line_obj = mbta_models.Line(
-        "Test Line", "Test Line Name"
-    )
+    line_obj = mbta_models.Line("Test Line", "Test Line Name")
     db.session.add(line_obj)
     db.session.commit()
     return line_obj

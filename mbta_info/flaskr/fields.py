@@ -29,18 +29,24 @@ class StringForeignKey(mm.fields.String):
         elif not self.model.query.count():
             raise self.make_error("no_model_data", model_name=self.model_name)
         else:
-            raise self.make_error("missing_entry", model_name=self.model_name, model_id=value)
+            raise self.make_error(
+                "missing_entry", model_name=self.model_name, model_id=value
+            )
 
     def is_empty_table_error(self, error: mm.ValidationError) -> bool:
         """Return True if the message for error matches self.EMPTY_TABLE_MESSAGE. Otherwise return False."""
         err_message = self._get_message_from_error(error)
-        return err_message == self.EMPTY_TABLE_MESSAGE.format(**{"model_name": self.model_name})
+        return err_message == self.EMPTY_TABLE_MESSAGE.format(
+            **{"model_name": self.model_name}
+        )
 
     def is_missing_instance_error(self, error: mm.ValidationError) -> bool:
         """Return True if the message for error matches self.MISSING_MODEL_MESSAGE. Otherwise return False."""
         err_message = self._get_message_from_error(error)
         err_message_start = err_message.split(":")[0]  # Drop model id value
-        return err_message_start == self.MISSING_MODEL_BASE.format(**{"model_name": self.model_name})
+        return err_message_start == self.MISSING_MODEL_BASE.format(
+            **{"model_name": self.model_name}
+        )
 
     @staticmethod
     def _get_message_from_error(error: mm.ValidationError) -> str:

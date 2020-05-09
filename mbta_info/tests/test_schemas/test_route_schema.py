@@ -1,7 +1,7 @@
 import marshmallow as mm
 import pytest
 
-from mbta_info.flaskr import schemas, schema_utils, models as mbta_models
+from mbta_info.flaskr import schemas, models as mbta_models
 
 
 def test_load_good_data(agency, line):
@@ -39,15 +39,15 @@ def test_load_good_data(agency, line):
 @pytest.mark.parametrize(
     "route_data_update",
     (
-            {"route_id": ""},
-            {"agency_id": "NAN"},
-            {"route_long_name": ""},
-            {"route_type": "NAN"},
-            {"route_url": "bad url"},
-            {"route_sort_order": "NAN"},
-            {"route_fare_class": "Bad Fare Class"},
-            {"line_id": "Bad Line Id"},
-            {"bad_key": "anything"},
+        {"route_id": ""},
+        {"agency_id": "NAN"},
+        {"route_long_name": ""},
+        {"route_type": "NAN"},
+        {"route_url": "bad url"},
+        {"route_sort_order": "NAN"},
+        {"route_fare_class": "Bad Fare Class"},
+        {"line_id": "Bad Line Id"},
+        {"bad_key": "anything"},
     ),
 )
 def test_load_bad_data(route_data_update, agency, line):

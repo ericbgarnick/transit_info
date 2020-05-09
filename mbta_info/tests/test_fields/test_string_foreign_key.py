@@ -36,7 +36,9 @@ def test_deserialize_no_data(db):
 def test_is_empty_table_error_true():
     # GIVEN
     string_fk_field = fields.StringForeignKey(test_models.TestModel)
-    missing_route_error = string_fk_field.make_error("no_model_data", model_name="TestModel")
+    missing_route_error = string_fk_field.make_error(
+        "no_model_data", model_name="TestModel"
+    )
 
     # THEN
     assert string_fk_field.is_empty_table_error(missing_route_error) is True
@@ -46,18 +48,16 @@ def test_is_missing_instance_error_true():
     # GIVEN
     model_id = "Test1"
     string_fk_field = fields.StringForeignKey(test_models.TestModel)
-    missing_route_error = string_fk_field.make_error("missing_entry", model_name="TestModel", model_id=model_id)
+    missing_route_error = string_fk_field.make_error(
+        "missing_entry", model_name="TestModel", model_id=model_id
+    )
 
     # THEN
     assert string_fk_field.is_missing_instance_error(missing_route_error) is True
 
 
 @pytest.mark.parametrize(
-    "error_check_function_name",
-    (
-            "is_empty_table_error",
-            "is_missing_instance_error"
-    )
+    "error_check_function_name", ("is_empty_table_error", "is_missing_instance_error")
 )
 def test_is_x_error_false(error_check_function_name: str):
     # GIVEN
