@@ -7,9 +7,9 @@ import typing
 from flask import g
 from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
-from sqlalchemy import inspect
 from sqlalchemy.exc import DataError
 
+from mbta_info.flaskr import model_utils
 from mbta_info.flaskr.tools.utils import model_name_from_table_name
 
 
@@ -27,7 +27,7 @@ class Loader:
             model = self.get_model_for_table(table_name)
             model_schema = self.get_schema_for_table(table_name)
 
-            model_pk_field = inspect(model).primary_key[0].name
+            model_pk_field = model_utils.pk_field_name(model)
             existing_pks = {
                 tup[0]
                 for tup in self.db.session.query(getattr(model, model_pk_field)).all()

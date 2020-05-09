@@ -135,9 +135,10 @@ def test_update_or_create_object_new_obj(db):
     model_pk_field = "test_id"
     existing_pks = set()
     data_row = {
-        "test_id": 1,
+        "test_id": "test1",
         "test_name": "test_name",
         "test_type": "0",
+        "test_order": 15,
         "test_dist": 0.5,
         "geo_stub_id": geo_stub.geo_stub_id,
     }
@@ -164,7 +165,7 @@ def test_update_or_create_object_existing_obj(db):
     # GIVEN
     geo_stub = test_models.GeoStub(1, 10.1, 20.2)
     existing_test_model = test_models.TestModel(
-        1, "old_test_name", test_models.TestType.type_0
+        "test1", "old_test_name", test_models.TestType.type_0
     )
     db.session.add(geo_stub)
     db.session.add(existing_test_model)
@@ -174,12 +175,13 @@ def test_update_or_create_object_existing_obj(db):
     schema = test_schemas.TestModelSchema()
     model_pk_field = "test_id"
     existing_pks = {
-        1,
+        "test1",
     }
     data_row = {
-        "test_id": 1,
+        "test_id": "test1",
         "test_name": "new_test_name",  # change from "old_test_name"
         "test_type": "1",  # change from type_0
+        "test_order": 12,  # Fill blank value
         "test_dist": 0.5,  # Fill blank value
         "geo_stub_id": geo_stub.geo_stub_id,  # Fill blank value
     }
@@ -209,9 +211,9 @@ def test_update_or_create_object_bad_data(db, capsys):
     model_pk_field = "test_id"
     existing_pks = set()
     data_row = {
-        "test_id": "a",
+        "test_id": "",
         "test_name": "test_name",
-        "test_type": "0",
+        "test_type": "NAN",
     }
 
     # WHEN

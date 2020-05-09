@@ -2,6 +2,7 @@ import pytest
 
 from mbta_info.flaskr.database import db as project_db
 from mbta_info.flaskr import create_app, set_g, models as mbta_models
+from mbta_info.tests import models as test_models
 
 
 # https://github.com/pytest-dev/pytest/issues/363#issuecomment-406536200
@@ -37,9 +38,35 @@ def db(app):
 
 
 @pytest.fixture
+def geo_stub(db) -> test_models.GeoStub:
+    geo_stub_obj = test_models.GeoStub(
+        1, 100.1, 200.2
+    )
+    db.session.add(geo_stub_obj)
+    db.session.commit()
+    return geo_stub_obj
+
+
+@pytest.fixture
+def test_model(db, geo_stub) -> test_models.TestModel:
+    test_model_obj = test_models.TestModel(
+        "test1",
+        "Test Model",
+        test_models.TestType.type_0,
+        **{"test_order": 23, "test_dist": 5.5, "geo_stub_id": geo_stub.geo_stub_id}
+    )
+    db.session.add(test_model_obj)
+    db.session.commit()
+    return test_model_obj
+
+
+@pytest.fixture
 def agency(db) -> mbta_models.Agency:
     agency_obj = mbta_models.Agency(
-        1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York
+        1,
+        "Agency",
+        "http://www.agency.com",
+        mbta_models.TimeZone.America_New_York
     )
     db.session.add(agency_obj)
     db.session.commit()

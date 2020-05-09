@@ -21,9 +21,10 @@ class GeoStubSchema(mm.Schema):
 
 
 class TestModelSchema(mm.Schema):
-    test_id = mm.fields.Int(required=True)
+    test_id = mm.fields.Str(required=True)
     test_name = mm.fields.Str(required=True)
     test_type = EnumField(test_models.TestType, required=True)
+    test_order = mm.fields.Int(required=False)
     test_dist = mm.fields.Float(required=False)
     geo_stub_id = mm.fields.Int(required=False)
 

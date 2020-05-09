@@ -210,7 +210,7 @@ class ShapeSchema(mm.Schema):
 
 
 class DirectionSchema(mm.Schema):
-    route_id = mbta_fields.RouteId(required=True)
+    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
     direction_id = mm.fields.Int(required=True)
     direction = mm.fields.Str(required=True)
     direction_destination = mm.fields.Str(required=True)
@@ -220,7 +220,7 @@ class DirectionSchema(mm.Schema):
         try:
             return super().load(*args, **kwargs)
         except mm.ValidationError as ve:
-            if mbta_fields.RouteId.is_missing_route_error(ve):
+            if mbta_fields.StringForeignKey.is_missing_instance_error(ve):
                 logger.info(ve.normalized_messages())
                 return None
             else:
