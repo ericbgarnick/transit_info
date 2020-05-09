@@ -59,23 +59,22 @@ def test_load_good_data(stop_data: typing.Dict):
 @pytest.mark.parametrize(
     "stop_data_update",
     (
-        {"route_id": ""},
-        {"agency_id": "NAN"},
-        {"route_long_name": ""},
-        {"route_type": "NAN"},
-        {"route_url": "bad url"},
-        {"route_sort_order": "NAN"},
-        {"route_fare_class": "Bad Fare Class"},
-        {"line_id": "Bad Line Id"},
+        {"stop_id": ""},
+        {"stop_lat": "NAN"},
+        {"stop_lon": "NAN"},
+        {"stop_url": "bad url"},
+        {"location_type": "100000"},
+        {"parent_station": "bad stop id"},
+        {"wheelchair_boarding": "NAN"},
+        {"vehicle_type": "NAN"},
+        {"stop_timezone": "bad timezone"},
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(stop_data_update, stop_data):
+def test_load_bad_data(stop_data_update: typing.Dict, stop_data: typing.Dict):
     # GIVEN
     stop_data.update(stop_data_update)
 
     # THEN
     with pytest.raises(mm.ValidationError):
         schemas.StopSchema().load(stop_data)
-
-
