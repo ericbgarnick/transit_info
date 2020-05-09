@@ -4,16 +4,6 @@ import pytest
 from mbta_info.flaskr import fields, models as mbta_models
 
 
-@pytest.fixture
-def agency(db) -> mbta_models.Agency:
-    agency_obj = mbta_models.Agency(
-        1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York
-    )
-    db.session.add(agency_obj)
-    db.session.commit()
-    return agency_obj
-
-
 def test_deserialize_success(db, agency):
     # GIVEN
     route_id = "Test Route"

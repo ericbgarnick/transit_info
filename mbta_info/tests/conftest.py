@@ -1,7 +1,7 @@
 import pytest
 
 from mbta_info.flaskr.database import db as project_db
-from mbta_info.flaskr import create_app, set_g
+from mbta_info.flaskr import create_app, set_g, models as mbta_models
 
 
 # https://github.com/pytest-dev/pytest/issues/363#issuecomment-406536200
@@ -34,3 +34,23 @@ def app(set_test_env):
 @pytest.fixture
 def db(app):
     return project_db
+
+
+@pytest.fixture
+def agency(db) -> mbta_models.Agency:
+    agency_obj = mbta_models.Agency(
+        1, "Agency", "http://www.agency.com", mbta_models.TimeZone.America_New_York
+    )
+    db.session.add(agency_obj)
+    db.session.commit()
+    return agency_obj
+
+
+@pytest.fixture
+def line(db) -> mbta_models.Line:
+    line_obj = mbta_models.Line(
+        "Test Line", "Test Line Name"
+    )
+    db.session.add(line_obj)
+    db.session.commit()
+    return line_obj

@@ -1,5 +1,7 @@
 from typing import Optional
 
+import marshmallow as mm
+
 
 def timezone_enum_key(raw_tz_name: Optional[str]) -> Optional[str]:
     return raw_tz_name.replace("/", "_") if raw_tz_name else raw_tz_name
@@ -9,7 +11,7 @@ def numbered_type_enum_key(
     numeral: Optional[str], default_0: bool = False
 ) -> Optional[str]:
     if numeral and not numeral.isdecimal():
-        raise TypeError("numbered_type_enum_key received a non-numeric value")
+        raise mm.ValidationError("numbered_type_enum_key received a non-decimal value")
     if default_0:
         numeral = numeral or "0"
     return "type_" + numeral if numeral else None

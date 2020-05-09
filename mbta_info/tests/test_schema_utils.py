@@ -1,5 +1,6 @@
 from typing import Optional
 
+import marshmallow as mm
 import pytest
 
 from mbta_info.flaskr.schema_utils import (
@@ -19,7 +20,7 @@ def test_timezone_enum_key(raw_value: Optional[str], updated_value: Optional[str
 
 @pytest.mark.parametrize("raw_value", ("a", "1.1", "-1"))
 def test_numbered_type_enum_key_bad_value(raw_value):
-    with pytest.raises(TypeError):
+    with pytest.raises(mm.ValidationError):
         numbered_type_enum_key(raw_value)
 
 

@@ -1,7 +1,7 @@
 import marshmallow as mm
 import pytest
 
-from mbta_info.flaskr import schemas, models as mbta_models
+from mbta_info.flaskr import schemas, schema_utils, models as mbta_models
 
 
 def test_load_good_data():
@@ -22,7 +22,7 @@ def test_load_good_data():
     assert isinstance(agency_obj, mbta_models.Agency)
     for key, value in agency_data.items():
         if key == "agency_timezone":
-            value = getattr(mbta_models.TimeZone, value.replace("/", "_"))
+            value = getattr(mbta_models.TimeZone, schema_utils.timezone_enum_key(value))
         elif key == "agency_lang":
             value = getattr(mbta_models.LangCode, value.lower())
         elif key == "agency_id":
