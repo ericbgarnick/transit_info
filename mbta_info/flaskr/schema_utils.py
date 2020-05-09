@@ -20,3 +20,11 @@ def numbered_type_enum_key(
 def time_as_seconds(time_string: str) -> int:
     hours, minutes, seconds = [int(val) for val in time_string.split(":")]
     return 3600 * hours + 60 * minutes + seconds
+
+
+def int_str_to_bool(int_str: str) -> bool:
+    """Return True for '1', False for '0'"""
+    try:
+        return {"1": True, "0": False}[int_str]
+    except KeyError:
+        raise mm.ValidationError(f"int_str_to_bool cannot interpret {int_str} as bool")

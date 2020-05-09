@@ -168,8 +168,9 @@ class CalendarSchema(mm.Schema):
             "saturday",
             "sunday",
         ]:
-            in_data[day] = bool(int(in_data[day]))
-        return in_data
+            in_data[day] = schema_utils.int_str_to_bool(in_data[day])
+        # Don't filter out False weekday values
+        return {k: v for k, v in in_data.items() if v not in ["", None]}
 
     @mm.post_load
     def make_calendar(self, data: typing.Dict, **kwargs) -> mbta_models.Calendar:
