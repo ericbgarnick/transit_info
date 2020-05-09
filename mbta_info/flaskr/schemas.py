@@ -220,7 +220,7 @@ class DirectionSchema(mm.Schema):
         try:
             return super().load(*args, **kwargs)
         except mm.ValidationError as ve:
-            if mbta_fields.StringForeignKey.is_missing_instance_error(ve):
+            if self.route_id.is_missing_instance_error(ve):
                 logger.info(ve.normalized_messages())
                 return None
             else:

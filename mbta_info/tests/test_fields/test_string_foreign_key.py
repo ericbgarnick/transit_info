@@ -20,32 +20,50 @@ def test_deserialize_bad_instance_id(test_model: test_models.TestModel):
     # THEN: deserializing a test_id value that doesn't exist in the db raises a ValidationError
     with pytest.raises(mm.ValidationError) as excinfo:
         string_fk_field.deserialize("Bad Instance Id")
-    assert fields.StringForeignKey.is_missing_instance_error(excinfo.value)
+    assert string_fk_field.is_missing_instance_error(excinfo.value)
 
 
-def test_deserialize_no_routes(db):
+def test_deserialize_no_data(db):
     # GIVEN
-    route_id_field = fields.StringForeignKey()
+    string_fk_field = fields.StringForeignKey(test_models.TestModel)
 
     # THEN
     with pytest.raises(mm.ValidationError) as excinfo:
-        route_id_field.deserialize("Route Id")
-    assert str(excinfo.value) == route_id_field.error_messages["no_routes"]
+        string_fk_field.deserialize("Any Id")
+    assert string_fk_field.is_empty_table_error(excinfo.value)
 
 
-def test_is_missing_route_error_true():
+def test_is_empty_table_error_true():
     # GIVEN
-    route_id = "Test Route"
-    route_id_field = fields.StringForeignKey()
-    missing_route_error = route_id_field.make_error("missing_route", route_id=route_id)
+    string_fk_field = fields.StringForeignKey(test_models.TestModel)
+    missing_route_error = string_fk_field.make_error("no_model_data", model_name="TestModel")
 
     # THEN
-    assert route_id_field.is_missing_instance_error(missing_route_error) is True
+    assert string_fk_field.is_empty_table_error(missing_route_error) is True
 
 
-def test_is_missing_route_error_false():
+def test_is_missing_instance_error_true():
     # GIVEN
+    model_id = "Test1"
+    string_fk_field = fields.StringForeignKey(test_models.TestModel)
+    missing_route_error = string_fk_field.make_error("missing_entry", model_name="TestModel", model_id=model_id)
+
+    # THEN
+    assert string_fk_field.is_missing_instance_error(missing_route_error) is True
+
+
+@pytest.mark.parametrize(
+    "error_check_function_name",
+    (
+            "is_empty_table_error",
+            "is_missing_instance_error"
+    )
+)
+def test_is_x_error_false(error_check_function_name: str):
+    # GIVEN
+    string_fk_field = fields.StringForeignKey(test_models.TestModel)
     other_validation_error = mm.ValidationError("Dummy message")
 
     # THEN
-    assert fields.StringForeignKey.is_missing_instance_error(other_validation_error) is False
+    error_check_function = getattr(string_fk_field, error_check_function_name)
+    assert error_check_function(other_validation_error) is False
