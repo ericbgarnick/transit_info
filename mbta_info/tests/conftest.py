@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from mbta_info.flaskr.database import db as project_db
@@ -78,7 +80,7 @@ def line(db) -> mbta_models.Line:
 
 
 @pytest.fixture
-def route(agency: mbta_models.Agency, db) -> mbta_models.Route:
+def route(db, agency: mbta_models.Agency) -> mbta_models.Route:
     route_obj = mbta_models.Route("Route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0)
     db.session.add(route_obj)
     db.session.commit()
@@ -91,3 +93,21 @@ def stop(db) -> mbta_models.Stop:
     db.session.add(stop_obj)
     db.session.commit()
     return stop_obj
+
+
+@pytest.fixture
+def calendar(db):
+    today = datetime.date.today()
+    tomorrow = today + datetime.timedelta(days=1)
+    calendar_obj = mbta_models.Calendar("service1", True, True, True, True, True, False, False, today, tomorrow)
+    db.session.add(calendar_obj)
+    db.session.commit()
+    return calendar_obj
+
+
+@pytest.fixture
+def route_pattern(db, route: mbta_models.Route):
+    route_pattern_obj = mbta_models.RoutePattern("route_pattern1", f"{route.route_id}")
+    db.session.add(route_pattern_obj)
+    db.session.commit()
+    return route_pattern_obj

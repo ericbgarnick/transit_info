@@ -272,8 +272,8 @@ class RoutePatternSchema(mm.Schema):
 
 
 class TripSchema(mm.Schema):
-    route_id = mm.fields.Str(required=True)
-    service_id = mm.fields.Str(required=True)
+    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
+    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
     trip_id = mm.fields.Str(required=True)
     trip_headsign = mm.fields.Str()
     trip_short_name = mm.fields.Str()
@@ -282,7 +282,7 @@ class TripSchema(mm.Schema):
     shape_id = mm.fields.Str()
     wheelchair_accessible = EnumField(mbta_models.TripAccessibility)
     trip_route_type = EnumField(mbta_models.RouteType)
-    route_pattern_id = mm.fields.Str()
+    route_pattern_id = mbta_fields.StringForeignKey(mbta_models.RoutePattern)
     bikes_allowed = EnumField(mbta_models.TripAccessibility)
 
     @mm.pre_load
