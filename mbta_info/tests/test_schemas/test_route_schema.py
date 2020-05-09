@@ -1,12 +1,13 @@
 import marshmallow as mm
 import pytest
+import typing
 
 from mbta_info.flaskr import schemas, models as mbta_models
 
 
-def test_load_good_data(agency, line):
-    # GIVEN
-    route_data = {
+@pytest.fixture
+def route_data(agency: mbta_models.Agency, line: mbta_models.Line) -> typing.Dict:
+    return {
         "route_id": "Test Route",
         "agency_id": f"{agency.agency_id}",
         "route_short_name": "Test Route",
@@ -21,7 +22,9 @@ def test_load_good_data(agency, line):
         "line_id": f"{line.line_id}",
     }
 
-    # WHEN
+
+def test_load_good_data(route_data: typing.Dict):
+    # GIVEN
     route_obj = schemas.RouteSchema().load(route_data)
 
     # THEN
@@ -50,22 +53,8 @@ def test_load_good_data(agency, line):
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(route_data_update, agency, line):
+def test_load_bad_data(route_data_update: typing.Dict, route_data: typing.Dict):
     # GIVEN
-    route_data = {
-        "route_id": "Test Route",
-        "agency_id": f"{agency.agency_id}",
-        "route_short_name": "Test Route",
-        "route_long_name": "Test Route Name",
-        "route_desc": "A Route for Testing",
-        "route_type": "0",
-        "route_url": "http://www.route.com",
-        "route_color": "FFFFFF",
-        "route_text_color": "BBBBBB",
-        "route_sort_order": "25",
-        "route_fare_class": "Rapid Transit",
-        "line_id": f"{line.line_id}",
-    }
     route_data.update(route_data_update)
 
     # THEN

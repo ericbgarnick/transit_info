@@ -108,7 +108,7 @@ class StopSchema(mm.Schema):
     stop_url = mm.fields.Url()
     level_id = mm.fields.Str()
     location_type = EnumField(mbta_models.LocationType)
-    parent_station = mm.fields.Str()
+    parent_station = mbta_fields.StringForeignKey(mbta_models.Stop)
     wheelchair_boarding = EnumField(mbta_models.AccessibilityType)
     municipality = mm.fields.Str()
     on_street = mm.fields.Str()

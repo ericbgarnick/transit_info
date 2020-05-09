@@ -74,3 +74,11 @@ def line(db) -> mbta_models.Line:
     db.session.add(line_obj)
     db.session.commit()
     return line_obj
+
+
+@pytest.fixture
+def stop(db) -> mbta_models.Stop:
+    stop_obj = mbta_models.Stop("Stop1")
+    db.session.add(stop_obj)
+    db.session.commit()
+    return stop_obj

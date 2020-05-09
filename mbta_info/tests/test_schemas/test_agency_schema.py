@@ -1,12 +1,13 @@
 import marshmallow as mm
 import pytest
+import typing
 
 from mbta_info.flaskr import schemas, schema_utils, models as mbta_models
 
 
-def test_load_good_data():
-    # GIVEN
-    agency_data = {
+@pytest.fixture
+def agency_data() -> typing.Dict:
+    return {
         "agency_id": "1",
         "agency_name": "Agency",
         "agency_url": "http://www.agency.com",
@@ -15,7 +16,9 @@ def test_load_good_data():
         "agency_phone": "555-555-5555",
     }
 
-    # WHEN
+
+def test_load_good_data(agency_data):
+    # GIVEN
     agency_obj = schemas.AgencySchema().load(agency_data)
 
     # THEN
@@ -41,16 +44,8 @@ def test_load_good_data():
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(agency_data_update):
+def test_load_bad_data(agency_data_update: typing.Dict, agency_data: typing.Dict):
     # GIVEN
-    agency_data = {
-        "agency_id": "1",
-        "agency_name": "Agency",
-        "agency_url": "http://www.agency.com",
-        "agency_timezone": "America/New_York",
-        "agency_lang": "EN",
-        "agency_phone": "555-555-5555",
-    }
     agency_data.update(agency_data_update)
 
     # THEN
