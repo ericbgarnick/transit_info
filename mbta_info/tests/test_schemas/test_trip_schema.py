@@ -2,11 +2,15 @@ import marshmallow as mm
 import pytest
 import typing
 
-from mbta_info.flaskr import schemas, schema_utils, models as mbta_models
+from mbta_info.flaskr import schemas, models as mbta_models
 
 
 @pytest.fixture
-def trip_data(route: mbta_models.Route, calendar: mbta_models.Calendar, route_pattern: mbta_models.RoutePattern) -> typing.Dict:
+def trip_data(
+    route: mbta_models.Route,
+    calendar: mbta_models.Calendar,
+    route_pattern: mbta_models.RoutePattern,
+) -> typing.Dict:
     return {
         "route_id": f"{route.route_id}",
         "service_id": f"{calendar.service_id}",

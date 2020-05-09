@@ -37,7 +37,9 @@ def test_numbered_type_enum_key_no_default(
 def test_numbered_type_enum_key_with_default(
     raw_value: Optional[str], updated_value: str
 ):
-    assert schema_utils.numbered_type_enum_key(raw_value, default_0=True) == updated_value
+    assert (
+        schema_utils.numbered_type_enum_key(raw_value, default_0=True) == updated_value
+    )
 
 
 @pytest.mark.parametrize("time_string", ["", "10-10-10", "10:10", "a:b:c", "abc123"])
@@ -54,16 +56,12 @@ def test_time_as_seconds(time_string: str, num_seconds: int):
     assert schema_utils.time_as_seconds(time_string) == num_seconds
 
 
-@pytest.mark.parametrize(
-    "input_val, result", [("1", True), ("0", False)]
-)
+@pytest.mark.parametrize("input_val, result", [("1", True), ("0", False)])
 def test_int_str_to_bool_good_data(input_val: str, result: bool):
     assert schema_utils.int_str_to_bool(input_val) is result
 
 
-@pytest.mark.parametrize(
-    "input_val", ("2", "a", "1.0", "", 1, 0, True, False, 1.0)
-)
+@pytest.mark.parametrize("input_val", ("2", "a", "1.0", "", 1, 0, True, False, 1.0))
 def test_int_str_to_bool_bad_data(input_val: str):
     with pytest.raises(mm.ValidationError):
         schema_utils.int_str_to_bool(input_val)

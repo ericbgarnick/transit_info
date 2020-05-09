@@ -375,7 +375,9 @@ class TypicalityType(enum.Enum):
     type_0 = "not_defined"
     type_1 = "typical"  # Usually 1 pattern per route, occasionally 2, rarely more
     type_2 = "deviation"
-    type_3 = "highly_atypical"  # e.g. special routing that only runs a few times per day
+    type_3 = (
+        "highly_atypical"  # e.g. special routing that only runs a few times per day
+    )
     type_4 = "diversion"  # e.g. planned detour, bus shuttle, snow route
 
 

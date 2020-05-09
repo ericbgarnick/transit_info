@@ -32,7 +32,7 @@ def stop_data(stop: mbta_models.Stop) -> typing.Dict:
     }
 
 
-@pytest.mark.parametrize("pop_keys", [("stop_lon", "stop_lat"), ("", )])
+@pytest.mark.parametrize("pop_keys", [("stop_lon", "stop_lat"), ("",)])
 def test_load_good_data(pop_keys: str, stop_data: typing.Dict):
     # GIVEN
     for pop_key in pop_keys:

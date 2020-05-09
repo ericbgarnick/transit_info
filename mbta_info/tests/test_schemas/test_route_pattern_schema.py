@@ -43,7 +43,9 @@ def test_load_good_data(route_pattern_data: typing.Dict):
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(route_pattern_data_update: typing.Dict, route_pattern_data: typing.Dict):
+def test_load_bad_data(
+    route_pattern_data_update: typing.Dict, route_pattern_data: typing.Dict
+):
     # GIVEN
     route_pattern_data.update(route_pattern_data_update)
 

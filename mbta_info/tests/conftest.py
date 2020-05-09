@@ -54,7 +54,7 @@ def test_model(db, geo_stub) -> test_models.TestModel:
         "test1",
         "Test Model",
         test_models.TestType.type_0,
-        **{"test_order": 23, "test_dist": 5.5, "geo_stub_id": geo_stub.geo_stub_id}
+        **{"test_order": 23, "test_dist": 5.5, "geo_stub_id": geo_stub.geo_stub_id},
     )
     db.session.add(test_model_obj)
     db.session.commit()
@@ -81,7 +81,9 @@ def line(db) -> mbta_models.Line:
 
 @pytest.fixture
 def route(db, agency: mbta_models.Agency) -> mbta_models.Route:
-    route_obj = mbta_models.Route("Route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0)
+    route_obj = mbta_models.Route(
+        "Route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0
+    )
     db.session.add(route_obj)
     db.session.commit()
     return route_obj
@@ -99,7 +101,9 @@ def stop(db) -> mbta_models.Stop:
 def calendar(db):
     today = datetime.date.today()
     tomorrow = today + datetime.timedelta(days=1)
-    calendar_obj = mbta_models.Calendar("service1", True, True, True, True, True, False, False, today, tomorrow)
+    calendar_obj = mbta_models.Calendar(
+        "service1", True, True, True, True, True, False, False, today, tomorrow
+    )
     db.session.add(calendar_obj)
     db.session.commit()
     return calendar_obj
