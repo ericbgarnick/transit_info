@@ -86,7 +86,7 @@ class Loader:
         the data_row was successfully processed, 0 if skipped"""
         try:
             model_instance = model_schema.load(data_row)
-            if model_instance:
+            if model_instance:  # DirectionSchema returns None when given a bad route_id value
                 instance_pk = getattr(model_instance, model_pk_field)
                 if instance_pk in existing_pks:
                     # Update existing

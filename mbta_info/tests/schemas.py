@@ -21,7 +21,8 @@ class GeoStubSchema(mm.Schema):
 
 
 class TestModelSchema(mm.Schema):
-    test_id = mm.fields.Str(required=True)
+    SKIP_ID = "skip_me"
+    test_id = mm.fields.Str(required=True)  # Use test_id = SKIP_ID to skip an instance
     test_name = mm.fields.Str(required=True)
     test_type = EnumField(test_models.TestType, required=True)
     test_order = mm.fields.Int(required=False)
@@ -32,6 +33,13 @@ class TestModelSchema(mm.Schema):
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["test_type"] = schema_utils.numbered_type_enum_key(in_data["test_type"])
         return {k: v for k, v in in_data.items() if v}
+
+    def load(self, *args, **kwargs) -> typing.Optional[test_models.TestModel]:
+        data = args[0]
+        if data["test_id"] == self.SKIP_ID:
+            return None
+        else:
+            return super().load(*args, **kwargs)
 
     @mm.post_load
     def make_test_model(self, data: typing.Dict, **kwargs) -> test_models.TestModel:

@@ -230,7 +230,36 @@ def test_update_or_create_object_bad_data(db, capsys):
     )
 
 
-def test_update_or_create_object_full_run(db, monkeypatch, capsys):
+def test_update_or_create_object_no_object(db, capsys):
+    """Test that no exception occurs, but created objects count is
+    0 when no object can be created for the given data."""
+    # GIVEN
+    model = test_models.TestModel
+    schema = test_schemas.TestModelSchema()
+    model_pk_field = "test_id"
+    existing_pks = set()
+    data_row = {
+        "test_id": "skip_me",
+        "test_name": "test_name",
+        "test_type": "0",
+        "test_order": 15,
+        "test_dist": 0.5,
+        "geo_stub_id": "does not matter",
+    }
+
+    # WHEN
+    loader = Loader(db)
+    created_objects = loader.update_or_create_object(
+        model, schema, model_pk_field, existing_pks, data_row
+    )
+
+    # THEN
+    assert created_objects == 0
+    assert db.session.query(model).count() == 0
+    assert not capsys.readouterr().out
+
+
+def test_load_data_full_run(db, monkeypatch, capsys):
     """Test that data is successfully loaded from files."""
     # GIVEN
     model_names = ["geo_stub", "test_model"]
