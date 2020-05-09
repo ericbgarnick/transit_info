@@ -216,12 +216,18 @@ class DirectionSchema(mm.Schema):
     direction = mm.fields.Str(required=True)
     direction_destination = mm.fields.Str(required=True)
 
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        return {k: v for k, v in in_data.items() if v}
+
     def load(self, *args, **kwargs) -> typing.Optional[mbta_models.Direction]:
         """Load direction data, skipping rows that reference non-existent Routes"""
         try:
             return super().load(*args, **kwargs)
         except mm.ValidationError as ve:
-            if self.route_id.is_missing_instance_error(ve):
+            # self.route_id doesn't exist when a ValidationError has occurred
+            string_fk_field = mbta_fields.StringForeignKey(mbta_models.Route)
+            if string_fk_field.is_missing_instance_error(ve):
                 logger.info(ve.normalized_messages())
                 return None
             else:
