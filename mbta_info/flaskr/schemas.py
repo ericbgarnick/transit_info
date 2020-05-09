@@ -312,6 +312,10 @@ class CheckpointSchema(mm.Schema):
     checkpoint_id = mm.fields.Str(required=True)
     checkpoint_name = mm.fields.Str(required=True)
 
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        return {k: v for k, v in in_data.items() if v}
+
     @mm.post_load
     def make_checkpoint(self, data: typing.Dict, **kwargs) -> mbta_models.Checkpoint:
         return mbta_models.Checkpoint(
@@ -331,7 +335,7 @@ class StopTimeSchema(mm.Schema):
     drop_off_type = EnumField(mbta_models.PickupDropOffType)
     shape_dist_traveled = mm.fields.Float()
     timepoint = mm.fields.Int()
-    checkpoint_id = mm.fields.Str()
+    checkpoint_id = mbta_fields.StringForeignKey(mbta_models.Checkpoint)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:

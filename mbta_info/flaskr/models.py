@@ -508,8 +508,9 @@ class StopTime(db.Model):
         db.SmallInteger(), nullable=True
     )  # 0 = times are approximate, 1 = times are exact
     checkpoint_id = db.Column(
-        db.String(16), nullable=True
-    )  # References table PK, but not a FK because unknown usage
+        db.String(16), db.ForeignKey("checkpoint.checkpoint_id"), nullable=True
+    )
+    checkpoint = db.relationship("Checkpoint", backref="times")
 
     def __init__(
         self,
