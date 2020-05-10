@@ -34,8 +34,8 @@ def test_load_good_data(linked_dataset_data):
     "linked_dataset_data_update",
     (
         {"url": "bad url"},
-        {"trip_updates": "NAN"},
-        {"vehicle_positions": "NAN"},
+        {"trip_updates": "3"},
+        {"vehicle_positions": "1.1"},
         {"service_alerts": ""},
         {"authentication_type": "25"},
         {"bad_key": "anything"},

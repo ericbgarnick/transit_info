@@ -420,9 +420,9 @@ class StopTimeSchema(mm.Schema):
 
 class LinkedDatasetSchema(mm.Schema):
     url = mm.fields.Url(required=True)
-    trip_updates = mm.fields.Int(required=True)
-    vehicle_positions = mm.fields.Int(required=True)
-    service_alerts = mm.fields.Int(required=True)
+    trip_updates = bv.BinaryValue(required=True)
+    vehicle_positions = bv.BinaryValue(required=True)
+    service_alerts = bv.BinaryValue(required=True)
     authentication_type = EnumField(mbta_models.AuthenticationType, required=True)
 
     @mm.pre_load
