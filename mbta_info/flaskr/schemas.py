@@ -217,6 +217,27 @@ class CalendarAttributeSchema(mm.Schema):
         )
 
 
+class CalendarDateSchema(mm.Schema):
+    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
+    date = mm.fields.Date(format=DATE_INPUT_FORMAT, required=True)
+    exception_type = EnumField(mbta_models.DateExceptionType, required=True)
+    holiday_name = mm.fields.Str()
+
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        in_data["exception_type"] = schema_utils.numbered_type_enum_key(in_data["exception_type"])
+        return {k: v for k, v in in_data.items() if v}
+
+    @mm.post_load
+    def make_calendar_date(self, data: typing.Dict, **kwargs) -> mbta_models.CalendarDate:
+        return mbta_models.CalendarDate(
+            data.pop("service_id"),
+            data.pop("date"),
+            data.pop("exception_type"),
+            **data,
+        )
+
+
 class ShapeSchema(mm.Schema):
     shape_id = mm.fields.Str(required=True)
     shape_pt_lat = mm.fields.Float(required=True)

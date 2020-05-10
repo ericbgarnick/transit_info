@@ -13,6 +13,7 @@ mbta_data:
     agency: "agency.txt"
     calendar: "calendar.txt"
     calendar_attribute: "calendar_attributes.txt"
+    calendar_date: "calendar_dates.txt"
     checkpoint: "checkpoints.txt"
     direction: "directions.txt"
     line: "lines.txt"

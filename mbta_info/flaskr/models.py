@@ -366,6 +366,41 @@ class CalendarAttribute(db.Model):
         return f"<CalendarAttribute: {self.id} (Calendar {self.service_id})>"
 
 
+class DateExceptionType(enum.Enum):
+    type_1 = "addition"
+    type_2 = "removal"
+
+
+class CalendarDate(db.Model):
+    """
+    Exceptions for the services defined in the calendar
+    Requires: service_id, date, exception_type
+    Relies on: Calendar
+    References:
+        https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#calendar_datestxt
+        https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#calendar_datestxt
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(
+        db.String(64), db.ForeignKey("calendar.service_id"), nullable=False, index=True
+    )
+    service = db.relationship("Calendar", backref="dates")
+    date = db.Column(db.Date(), nullable=False)
+    exception_type = db.Column(db.Enum(DateExceptionType), nullable=False)
+    holidate_name = db.Column(db.String(32))
+
+    def __init__(self, service_id: str, date: datetime.date, exception_type: DateExceptionType, **kwargs):
+        self.service_id = service_id
+        self.date = date
+        self.exception_type = exception_type
+
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f"<CalendarDate: {self.exception_type.value} on {self.date} for {self.service_id}>"
+
+
 class Shape(db.Model, GeoMixin):
     """
     A rule for mapping vehicle travel paths, sometimes referred to as a route alignment

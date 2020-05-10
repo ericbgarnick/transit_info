@@ -23,6 +23,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
         "agency",
         "calendar",
         "calendar_attribute",
+        "calendar_date",
         "checkpoint",
         "geo_stub",
         "line",
