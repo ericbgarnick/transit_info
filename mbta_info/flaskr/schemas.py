@@ -445,3 +445,19 @@ class LinkedDatasetSchema(mm.Schema):
             service_alerts=data.pop("service_alerts"),
             authentication_type=data.pop("authentication_type"),
         )
+
+
+class MultiRouteTripSchema(mm.Schema):
+    added_route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
+    trip_id = fk_fields.StringForeignKey(mbta_models.Trip, required=True)
+
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        return {k: v for k, v in in_data.items() if v}
+
+    @mm.post_load
+    def make_multi_route_trip(self, data: typing.Dict, **kwargs) -> mbta_models.MultiRouteTrip:
+        return mbta_models.MultiRouteTrip(
+            added_route_id=data.pop("added_route_id"),
+            trip_id=data.pop("trip_id"),
+        )

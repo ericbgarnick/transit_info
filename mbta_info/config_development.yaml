@@ -24,3 +24,4 @@ mbta_data:
     stop_time: "stop_times.txt"
     stop: "stops.txt"
     trip: "trips.txt"
+    multi_route_trip: "multi_route_trips.txt"

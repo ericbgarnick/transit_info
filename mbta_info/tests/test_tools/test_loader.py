@@ -36,6 +36,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
         "trip",
         "stop_time",
         "linked_dataset",
+        "multi_route_trip",
     ]
     loader_args = [db] + batch_size_to_set
 

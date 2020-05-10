@@ -709,3 +709,28 @@ class LinkedDataset(db.Model):
 
     def __repr__(self):
         return f"<LinkedDataset: {self.url}>"
+
+
+class MultiRouteTrip(db.Model):
+    """
+    Some transit trips serve more than one route. This experimental file
+    indicates routes that a trip is associated with, in addition to the
+    route_id identified with this trip in trips.txt.
+    Requires: added_route_id, trip_id
+    Relies on: Route, Trip
+    Reference: https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#multi_route_tripstxt
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    added_route_id = db.Column(
+        db.String(64), db.ForeignKey("route.route_id"), nullable=False, index=True
+    )
+    route = db.relationship("Route", backref="multi_trips")
+    trip_id = db.Column(db.String(128), db.ForeignKey("trip.trip_id"), nullable=False, index=True)
+    trip = db.relationship("Trip", backref="multi_trips")
+
+    def __init__(self, added_route_id: str, trip_id: str):
+        self.added_route_id = added_route_id
+        self.trip_id = trip_id
+
+    def __repr__(self):
+        return f"<MultiRouteTrip: Route {self.added_route_id}, Trip {self.trip_id}>"
