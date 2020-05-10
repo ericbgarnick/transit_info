@@ -389,7 +389,7 @@ class StopTimeSchema(mm.Schema):
     pickup_type = EnumField(mbta_models.PickupDropOffType)
     drop_off_type = EnumField(mbta_models.PickupDropOffType)
     shape_dist_traveled = mm.fields.Float()
-    timepoint = mm.fields.Int()
+    timepoint = bv.BinaryValue()
     checkpoint_id = fk_fields.StringForeignKey(mbta_models.Checkpoint)
 
     @mm.pre_load

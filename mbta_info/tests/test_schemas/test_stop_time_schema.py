@@ -51,7 +51,7 @@ def test_load_good_data(stop_time_data: typing.Dict):
         {"pickup_type": "10"},
         {"drop_off_type": "NAN"},
         {"shape_dist_traveled": "NAN"},
-        {"timepoint": "NAN"},
+        {"timepoint": "3"},
         {"checkpoint_id": "bad checkpoint id"},
         {"bad_key": "anything"},
     ),
