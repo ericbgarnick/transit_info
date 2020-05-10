@@ -37,7 +37,7 @@ def test_load_data_missing_route(direction_data: typing.Dict):
 @pytest.mark.parametrize(
     "direction_data_update",
     (
-        {"direction_id": "NAN"},
+        {"direction_id": "2"},
         {"direction": ""},
         {"direction_destination": ""},
         {"bad_key": "anything"},

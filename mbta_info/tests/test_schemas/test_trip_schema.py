@@ -51,7 +51,7 @@ def test_load_good_data(trip_data: typing.Dict):
         {"route_id": "bad route id"},
         {"service_id": "bad service id"},
         {"trip_id": ""},
-        {"direction_id": "NAN"},
+        {"direction_id": "5"},
         {"wheelchair_accessible": "100"},
         {"trip_route_type": "35"},
         {"route_pattern_id": "bad route pattern id"},

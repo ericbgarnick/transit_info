@@ -5,7 +5,7 @@ import marshmallow as mm
 from marshmallow_enum import EnumField
 
 from mbta_info.flaskr import schema_utils, models as mbta_models
-from mbta_info.flaskr.fields import foreign_key as fk_fields
+from mbta_info.flaskr.fields import binary_value as bv, foreign_key as fk_fields
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +267,7 @@ class ShapeSchema(mm.Schema):
 
 class DirectionSchema(mm.Schema):
     route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
-    direction_id = mm.fields.Int(required=True)
+    direction_id = bv.BinaryValue(required=True)
     direction = mm.fields.Str(required=True)
     direction_destination = mm.fields.Str(required=True)
 
@@ -301,7 +301,7 @@ class DirectionSchema(mm.Schema):
 class RoutePatternSchema(mm.Schema):
     route_pattern_id = mm.fields.Str(required=True)
     route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
-    direction_id = mm.fields.Int()
+    direction_id = bv.BinaryValue()
     route_pattern_name = mm.fields.Str()
     route_pattern_time_desc = mm.fields.Str()
     route_pattern_typicality = EnumField(mbta_models.TypicalityType)
@@ -332,7 +332,7 @@ class TripSchema(mm.Schema):
     trip_id = mm.fields.Str(required=True)
     trip_headsign = mm.fields.Str()
     trip_short_name = mm.fields.Str()
-    direction_id = mm.fields.Int()
+    direction_id = bv.BinaryValue()
     block_id = mm.fields.Str()
     shape_id = mm.fields.Str()
     wheelchair_accessible = EnumField(mbta_models.TripAccessibility)

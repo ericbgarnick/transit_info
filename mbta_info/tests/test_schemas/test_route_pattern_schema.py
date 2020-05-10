@@ -37,7 +37,7 @@ def test_load_good_data(route_pattern_data: typing.Dict):
     (
         {"route_pattern_id": ""},
         {"route_id": "bad route id"},
-        {"direction_id": "NAN"},
+        {"direction_id": "-1"},
         {"route_pattern_typicality": "300"},
         {"route_pattern_sort_order": "NAN"},
         {"bad_key": "anything"},
