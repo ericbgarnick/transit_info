@@ -22,6 +22,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
     table_names = [
         "agency",
         "calendar",
+        "calendar_attribute",
         "checkpoint",
         "geo_stub",
         "line",

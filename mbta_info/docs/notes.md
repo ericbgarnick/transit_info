@@ -41,7 +41,8 @@ https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md
 
 #### Adding a new data sheet
 
-1. Update config_development.yaml with a mapping from the table name to the file name, placed in the list after any files it depends on
+1. Update config_development.yaml `mbta_data.files` with a mapping from the table name to the file name, placed in the list after any files it depends on
 2. Create a new db model in flaskr/models.py
 3. Create a marshmallow schema in flaskr/schemas.py
-4. Add unit tests for the schema (see existing schema tests for examples)
+4. Add new table name to test_loader::test_init `table_names` list, maintaining the order set in config_development.yaml
+5. Add unit tests for the schema (see existing schema tests for examples)
