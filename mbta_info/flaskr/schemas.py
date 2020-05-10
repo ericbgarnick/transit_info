@@ -63,7 +63,7 @@ class RouteSchema(mm.Schema):
     agency_id = mm.fields.Int(required=True)
     route_short_name = mm.fields.Str()
     route_long_name = mm.fields.Str(required=True)
-    route_desc = mm.fields.Str()
+    route_desc = EnumField(mbta_models.RouteDescription)
     route_type = EnumField(mbta_models.RouteType, required=True)
     route_url = mm.fields.Url()
     route_color = mm.fields.Str()
@@ -75,12 +75,12 @@ class RouteSchema(mm.Schema):
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data.pop("listed_route", None)
-        in_data["route_fare_class"] = (
-            in_data["route_fare_class"].replace(" ", "_").lower()
-        )
         in_data["route_type"] = schema_utils.numbered_type_enum_key(
             in_data["route_type"]
         )
+        for key in ("route_desc", "route_fare_class"):
+            in_data[key] = in_data[key].replace(" ", "_").lower()
+
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load

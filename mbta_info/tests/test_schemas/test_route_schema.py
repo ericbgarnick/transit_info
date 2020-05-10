@@ -12,7 +12,7 @@ def route_data(agency: mbta_models.Agency, line: mbta_models.Line) -> typing.Dic
         "agency_id": f"{agency.agency_id}",
         "route_short_name": "Test Route",
         "route_long_name": "Test Route Name",
-        "route_desc": "A Route for Testing",
+        "route_desc": "Rail Replacement Bus",
         "route_type": "0",
         "route_url": "http://www.route.com",
         "route_color": "FFFFFF",
@@ -36,6 +36,8 @@ def test_load_good_data(route_data: typing.Dict):
             value = int(value)
         elif key == "route_fare_class":
             value = getattr(mbta_models.FareClass, value.replace(" ", "_").lower())
+        elif key == "route_desc":
+            value = getattr(mbta_models.RouteDescription, value.replace(" ", "_").lower())
         assert getattr(route_obj, key) == value
 
 
@@ -45,6 +47,7 @@ def test_load_good_data(route_data: typing.Dict):
         {"route_id": ""},
         {"agency_id": "NAN"},
         {"route_long_name": ""},
+        {"route_desc": "Invalid Route Description"},
         {"route_type": "NAN"},
         {"route_url": "bad url"},
         {"route_sort_order": "NAN"},

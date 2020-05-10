@@ -152,6 +152,18 @@ class FareClass(enum.Enum):
     special = 7
 
 
+class RouteDescription(enum.Enum):
+    commuter_rail = "commuter_rail"
+    rapid_transit = "rapid_transit"
+    local_bus = "local_bus"
+    key_bus = "key_bus"
+    supplemental_bus = "supplemental_bus"
+    community_bus = "community_bus"
+    commuter_bus = "commuter_bus"
+    ferry = "ferry"
+    rail_replacement_bus = "rail_replacement_bus"
+
+
 class Route(db.Model):
     """
     A transit route
@@ -165,7 +177,7 @@ class Route(db.Model):
     agency = db.relationship("Agency", backref="routes")
     route_short_name = db.Column(db.String(16), nullable=True)
     route_long_name = db.Column(db.String(128), nullable=False)
-    route_desc = db.Column(db.String(32), nullable=True)
+    route_desc = db.Column(db.Enum(RouteDescription), nullable=True)
     route_type = db.Column(db.Enum(RouteType), nullable=False)
     route_url = db.Column(db.String(256), nullable=True)
     route_color = db.Column(db.String(8), nullable=True)
