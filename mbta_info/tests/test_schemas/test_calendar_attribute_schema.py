@@ -23,7 +23,9 @@ def calendar_attribute_data(calendar: mbta_models.Calendar) -> typing.Dict:
 
 def test_load_good_data(calendar_attribute_data: typing.Dict):
     # GIVEN
-    calendar_attribute_obj = schemas.CalendarAttributeSchema().load(calendar_attribute_data)
+    calendar_attribute_obj = schemas.CalendarAttributeSchema().load(
+        calendar_attribute_data
+    )
 
     # THEN
     assert isinstance(calendar_attribute_obj, mbta_models.CalendarAttribute)
@@ -33,9 +35,7 @@ def test_load_good_data(calendar_attribute_data: typing.Dict):
         elif key == "service_schedule_typicality":
             value = getattr(mbta_models.ServiceScheduleTypicality, value)
         elif key.endswith("date"):
-            value = datetime.datetime.strptime(
-                value, schemas.DATE_INPUT_FORMAT
-            ).date()
+            value = datetime.datetime.strptime(value, schemas.DATE_INPUT_FORMAT).date()
         assert getattr(calendar_attribute_obj, key) == value
 
 
@@ -52,7 +52,9 @@ def test_load_good_data(calendar_attribute_data: typing.Dict):
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(calendar_attribute_data_update: typing.Dict, calendar_attribute_data: typing.Dict):
+def test_load_bad_data(
+    calendar_attribute_data_update: typing.Dict, calendar_attribute_data: typing.Dict
+):
     # GIVEN
     calendar_attribute_data.update(calendar_attribute_data_update)
 

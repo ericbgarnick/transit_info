@@ -41,7 +41,9 @@ def test_load_good_data(linked_dataset_data):
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(linked_dataset_data_update: typing.Dict, linked_dataset_data: typing.Dict):
+def test_load_bad_data(
+    linked_dataset_data_update: typing.Dict, linked_dataset_data: typing.Dict
+):
     # GIVEN
     linked_dataset_data.update(linked_dataset_data_update)
 

@@ -4,9 +4,8 @@ import typing
 import marshmallow as mm
 from marshmallow_enum import EnumField
 
-from mbta_info.flaskr import models as mbta_models
-from mbta_info.flaskr import schema_utils
-from mbta_info.flaskr import fields as mbta_fields
+from mbta_info.flaskr import schema_utils, models as mbta_models
+from mbta_info.flaskr.fields import foreign_key as fk_fields
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,7 @@ class RouteSchema(mm.Schema):
     route_text_color = mm.fields.Str()
     route_sort_order = mm.fields.Int()
     route_fare_class = EnumField(mbta_models.FareClass)
-    line_id = mbta_fields.StringForeignKey(mbta_models.Line)
+    line_id = fk_fields.StringForeignKey(mbta_models.Line)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
@@ -110,7 +109,7 @@ class StopSchema(mm.Schema):
     stop_url = mm.fields.Url()
     level_id = mm.fields.Str()
     location_type = EnumField(mbta_models.LocationType)
-    parent_station = mbta_fields.StringForeignKey(mbta_models.Stop)
+    parent_station = fk_fields.StringForeignKey(mbta_models.Stop)
     wheelchair_boarding = EnumField(mbta_models.AccessibilityType)
     municipality = mm.fields.Str()
     on_street = mm.fields.Str()
@@ -189,7 +188,7 @@ class CalendarSchema(mm.Schema):
 
 
 class CalendarAttributeSchema(mm.Schema):
-    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
+    service_id = fk_fields.StringForeignKey(mbta_models.Calendar, required=True)
     service_description = mm.fields.Str(required=True)
     service_schedule_name = mm.fields.Str(required=True)
     service_schedule_type = EnumField(mbta_models.ServiceScheduleType, required=True)
@@ -207,7 +206,9 @@ class CalendarAttributeSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_calendar_attribute(self, data: typing.Dict, **kwargs) -> mbta_models.CalendarAttribute:
+    def make_calendar_attribute(
+        self, data: typing.Dict, **kwargs
+    ) -> mbta_models.CalendarAttribute:
         return mbta_models.CalendarAttribute(
             data.pop("service_id"),
             data.pop("service_description"),
@@ -218,18 +219,22 @@ class CalendarAttributeSchema(mm.Schema):
 
 
 class CalendarDateSchema(mm.Schema):
-    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
+    service_id = fk_fields.StringForeignKey(mbta_models.Calendar, required=True)
     date = mm.fields.Date(format=DATE_INPUT_FORMAT, required=True)
     exception_type = EnumField(mbta_models.DateExceptionType, required=True)
     holiday_name = mm.fields.Str()
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
-        in_data["exception_type"] = schema_utils.numbered_type_enum_key(in_data["exception_type"])
+        in_data["exception_type"] = schema_utils.numbered_type_enum_key(
+            in_data["exception_type"]
+        )
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_calendar_date(self, data: typing.Dict, **kwargs) -> mbta_models.CalendarDate:
+    def make_calendar_date(
+        self, data: typing.Dict, **kwargs
+    ) -> mbta_models.CalendarDate:
         return mbta_models.CalendarDate(
             data.pop("service_id"),
             data.pop("date"),
@@ -261,7 +266,7 @@ class ShapeSchema(mm.Schema):
 
 
 class DirectionSchema(mm.Schema):
-    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
+    route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
     direction_id = mm.fields.Int(required=True)
     direction = mm.fields.Str(required=True)
     direction_destination = mm.fields.Str(required=True)
@@ -276,7 +281,7 @@ class DirectionSchema(mm.Schema):
             return super().load(*args, **kwargs)
         except mm.ValidationError as ve:
             # self.route_id doesn't exist when a ValidationError has occurred
-            string_fk_field = mbta_fields.StringForeignKey(mbta_models.Route)
+            string_fk_field = fk_fields.StringForeignKey(mbta_models.Route)
             if string_fk_field.is_missing_instance_error(ve):
                 logger.info(ve.normalized_messages())
                 return None
@@ -295,7 +300,7 @@ class DirectionSchema(mm.Schema):
 
 class RoutePatternSchema(mm.Schema):
     route_pattern_id = mm.fields.Str(required=True)
-    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
+    route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
     direction_id = mm.fields.Int()
     route_pattern_name = mm.fields.Str()
     route_pattern_time_desc = mm.fields.Str()
@@ -322,8 +327,8 @@ class RoutePatternSchema(mm.Schema):
 
 
 class TripSchema(mm.Schema):
-    route_id = mbta_fields.StringForeignKey(mbta_models.Route, required=True)
-    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
+    route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
+    service_id = fk_fields.StringForeignKey(mbta_models.Calendar, required=True)
     trip_id = mm.fields.Str(required=True)
     trip_headsign = mm.fields.Str()
     trip_short_name = mm.fields.Str()
@@ -332,7 +337,7 @@ class TripSchema(mm.Schema):
     shape_id = mm.fields.Str()
     wheelchair_accessible = EnumField(mbta_models.TripAccessibility)
     trip_route_type = EnumField(mbta_models.RouteType)
-    route_pattern_id = mbta_fields.StringForeignKey(mbta_models.RoutePattern)
+    route_pattern_id = fk_fields.StringForeignKey(mbta_models.RoutePattern)
     bikes_allowed = EnumField(mbta_models.TripAccessibility)
 
     @mm.pre_load
@@ -375,17 +380,17 @@ class CheckpointSchema(mm.Schema):
 
 
 class StopTimeSchema(mm.Schema):
-    trip_id = mbta_fields.StringForeignKey(mbta_models.Trip, required=True)
+    trip_id = fk_fields.StringForeignKey(mbta_models.Trip, required=True)
     arrival_time = mm.fields.Int(required=True)
     departure_time = mm.fields.Int(required=True)
-    stop_id = mbta_fields.StringForeignKey(mbta_models.Stop, required=True)
+    stop_id = fk_fields.StringForeignKey(mbta_models.Stop, required=True)
     stop_sequence = mm.fields.Int(required=True)
     stop_headsign = mm.fields.Str()
     pickup_type = EnumField(mbta_models.PickupDropOffType)
     drop_off_type = EnumField(mbta_models.PickupDropOffType)
     shape_dist_traveled = mm.fields.Float()
     timepoint = mm.fields.Int()
-    checkpoint_id = mbta_fields.StringForeignKey(mbta_models.Checkpoint)
+    checkpoint_id = fk_fields.StringForeignKey(mbta_models.Checkpoint)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
@@ -428,7 +433,9 @@ class LinkedDatasetSchema(mm.Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @mm.post_load
-    def make_linked_dataset(self, data: typing.Dict, **kwargs) -> mbta_models.LinkedDataset:
+    def make_linked_dataset(
+        self, data: typing.Dict, **kwargs
+    ) -> mbta_models.LinkedDataset:
         return mbta_models.LinkedDataset(
             url=data.pop("url"),
             trip_updates=data.pop("trip_updates"),

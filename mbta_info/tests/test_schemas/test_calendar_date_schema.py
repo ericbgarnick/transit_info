@@ -27,9 +27,7 @@ def test_load_good_data(calendar_date_data: typing.Dict):
         if key == "exception_type":
             value = getattr(mbta_models.DateExceptionType, value)
         elif key == "date":
-            value = datetime.datetime.strptime(
-                value, schemas.DATE_INPUT_FORMAT
-            ).date()
+            value = datetime.datetime.strptime(value, schemas.DATE_INPUT_FORMAT).date()
         assert getattr(calendar_date_obj, key) == value
 
 
@@ -42,7 +40,9 @@ def test_load_good_data(calendar_date_data: typing.Dict):
         {"bad_key": "anything"},
     ),
 )
-def test_load_bad_data(calendar_date_data_update: typing.Dict, calendar_date_data: typing.Dict):
+def test_load_bad_data(
+    calendar_date_data_update: typing.Dict, calendar_date_data: typing.Dict
+):
     # GIVEN
     calendar_date_data.update(calendar_date_data_update)
 

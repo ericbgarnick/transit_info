@@ -322,7 +322,9 @@ class ServiceScheduleTypicality(enum.Enum):
     type_2 = "supplemental_service"  # Supplements typical schedules
     type_3 = "holiday_service"  # Provided by typical Saturday or Sunday schedule
     type_4 = "planned_disruption"  # Major change, example cause: construction
-    type_5 = "atypical_reduction"  # Major reduction due to unplanned events like weather
+    type_5 = (
+        "atypical_reduction"  # Major reduction due to unplanned events like weather
+    )
 
 
 class CalendarAttribute(db.Model):
@@ -333,6 +335,7 @@ class CalendarAttribute(db.Model):
     Relies on: Calendar
     Reference: https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#calendar_attributestxt
     """
+
     id = db.Column(db.Integer, primary_key=True)
     service_id = db.Column(
         db.String(64), db.ForeignKey("calendar.service_id"), nullable=False, index=True
@@ -347,12 +350,12 @@ class CalendarAttribute(db.Model):
     rating_description = db.Column(db.String(32))
 
     def __init__(
-            self,
-            service_id: str,
-            service_description: str,
-            service_schedule_name: str,
-            service_schedule_type: ServiceScheduleType,
-            **kwargs,
+        self,
+        service_id: str,
+        service_description: str,
+        service_schedule_name: str,
+        service_schedule_type: ServiceScheduleType,
+        **kwargs,
     ):
         self.service_id = service_id
         self.service_description = service_description
@@ -380,6 +383,7 @@ class CalendarDate(db.Model):
         https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#calendar_datestxt
         https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#calendar_datestxt
     """
+
     id = db.Column(db.Integer, primary_key=True)
     service_id = db.Column(
         db.String(64), db.ForeignKey("calendar.service_id"), nullable=False, index=True
@@ -389,7 +393,13 @@ class CalendarDate(db.Model):
     exception_type = db.Column(db.Enum(DateExceptionType), nullable=False)
     holidate_name = db.Column(db.String(32))
 
-    def __init__(self, service_id: str, date: datetime.date, exception_type: DateExceptionType, **kwargs):
+    def __init__(
+        self,
+        service_id: str,
+        date: datetime.date,
+        exception_type: DateExceptionType,
+        **kwargs,
+    ):
         self.service_id = service_id
         self.date = date
         self.exception_type = exception_type
@@ -641,6 +651,7 @@ class LinkedDataset(db.Model):
     Relies on: None
     Reference: https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#linked_datasetstxt
     """
+
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(256), nullable=False)
     trip_updates = db.Column(db.SmallInteger, nullable=False)  # 0 or 1
@@ -649,12 +660,12 @@ class LinkedDataset(db.Model):
     authentication_type = db.Column(db.Enum(AuthenticationType), nullable=False)
 
     def __init__(
-            self,
-            url: str,
-            trip_updates: int,
-            vehicle_positions: int,
-            service_alerts: int,
-            authentication_type: AuthenticationType,
+        self,
+        url: str,
+        trip_updates: int,
+        vehicle_positions: int,
+        service_alerts: int,
+        authentication_type: AuthenticationType,
     ):
         self.url = url
         self.trip_updates = trip_updates
