@@ -202,7 +202,7 @@ class CalendarAttributeSchema(mm.Schema):
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
         in_data["service_schedule_type"] = in_data["service_schedule_type"].lower()
         in_data["service_schedule_typicality"] = schema_utils.numbered_type_enum_key(
-            in_data["service_schedule_typicality"]
+            in_data["service_schedule_typicality"], default_0=True
         )
         return {k: v for k, v in in_data.items() if v}
 
@@ -410,4 +410,29 @@ class StopTimeSchema(mm.Schema):
             stop_id=data.pop("stop_id"),
             stop_sequence=data.pop("stop_sequence"),
             **data,
+        )
+
+
+class LinkedDatasetSchema(mm.Schema):
+    url = mm.fields.Url(required=True)
+    trip_updates = mm.fields.Int(required=True)
+    vehicle_positions = mm.fields.Int(required=True)
+    service_alerts = mm.fields.Int(required=True)
+    authentication_type = EnumField(mbta_models.AuthenticationType, required=True)
+
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        in_data["authentication_type"] = schema_utils.numbered_type_enum_key(
+            in_data["authentication_type"]
+        )
+        return {k: v for k, v in in_data.items() if v}
+
+    @mm.post_load
+    def make_linked_dataset(self, data: typing.Dict, **kwargs) -> mbta_models.LinkedDataset:
+        return mbta_models.LinkedDataset(
+            url=data.pop("url"),
+            trip_updates=data.pop("trip_updates"),
+            vehicle_positions=data.pop("vehicle_positions"),
+            service_alerts=data.pop("service_alerts"),
+            authentication_type=data.pop("authentication_type"),
         )

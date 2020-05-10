@@ -80,7 +80,7 @@ class Agency(db.Model):
 
     agency_id = db.Column(db.Integer, primary_key=True)
     agency_name = db.Column(db.String(64), nullable=False, unique=True)
-    agency_url = db.Column(db.String(64), nullable=False, unique=True)
+    agency_url = db.Column(db.String(256), nullable=False, unique=True)
     agency_timezone = db.Column(db.Enum(TimeZone), nullable=False)
     agency_lang = db.Column(db.Enum(LangCode), nullable=True)
     agency_phone = db.Column(db.String(16), nullable=True)
@@ -112,7 +112,7 @@ class Line(db.Model):
     line_short_name = db.Column(db.String(16), nullable=True)
     line_long_name = db.Column(db.String(128), nullable=False)
     line_desc = db.Column(db.String(32), nullable=True)
-    line_url = db.Column(db.String(64), nullable=True)
+    line_url = db.Column(db.String(256), nullable=True)
     line_color = db.Column(db.String(8), nullable=True)
     line_text_color = db.Column(db.String(8), nullable=True)
     line_sort_order = db.Column(db.Integer, nullable=True)
@@ -167,7 +167,7 @@ class Route(db.Model):
     route_long_name = db.Column(db.String(128), nullable=False)
     route_desc = db.Column(db.String(32), nullable=True)
     route_type = db.Column(db.Enum(RouteType), nullable=False)
-    route_url = db.Column(db.String(64), nullable=True)
+    route_url = db.Column(db.String(256), nullable=True)
     route_color = db.Column(db.String(8), nullable=True)
     route_text_color = db.Column(db.String(8), nullable=True)
     route_sort_order = db.Column(db.Integer, nullable=True)
@@ -236,7 +236,7 @@ class Stop(db.Model, GeoMixin):
     stop_lonlat = db.Column(Geometry("POINT"), nullable=True, index=True)
     zone_id = db.Column(db.String(32), nullable=True)
     stop_address = db.Column(db.String(128), nullable=True)
-    stop_url = db.Column(db.String(64), nullable=True)
+    stop_url = db.Column(db.String(256), nullable=True)
     level_id = db.Column(db.String(64), nullable=True)
     location_type = db.Column(db.Enum(LocationType), nullable=True)
     parent_station = db.Column(
@@ -626,3 +626,41 @@ class StopTime(db.Model):
         return (
             f"<StopTime: {self.arrival_time}->{self.departure_time} @ {self.stop_id}>"
         )
+
+
+class AuthenticationType(enum.Enum):
+    type_0 = "none"
+    # More to be added
+
+
+class LinkedDataset(db.Model):
+    """
+    URLs and authentication information for linked GTFS-realtime datasets:
+    Trip Updates, Vehicle Positions and Service Alerts.
+    Requires: url, trip_updates, vehicle_positions, service_alerts, authentication_type
+    Relies on: None
+    Reference: https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#linked_datasetstxt
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(256), nullable=False)
+    trip_updates = db.Column(db.SmallInteger, nullable=False)  # 0 or 1
+    vehicle_positions = db.Column(db.SmallInteger, nullable=False)  # 0 or 1
+    service_alerts = db.Column(db.SmallInteger, nullable=False)  # 0 or 1
+    authentication_type = db.Column(db.Enum(AuthenticationType), nullable=False)
+
+    def __init__(
+            self,
+            url: str,
+            trip_updates: int,
+            vehicle_positions: int,
+            service_alerts: int,
+            authentication_type: AuthenticationType,
+    ):
+        self.url = url
+        self.trip_updates = trip_updates
+        self.vehicle_positions = vehicle_positions
+        self.service_alerts = service_alerts
+        self.authentication_type = authentication_type
+
+    def __repr__(self):
+        return f"<LinkedDataset: {self.url}>"

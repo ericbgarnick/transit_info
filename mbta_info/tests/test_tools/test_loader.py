@@ -19,7 +19,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
     """Assert Loader calls db.create_all(), sets max_batch_size and table_names"""
     # GIVEN
     monkeypatch.setattr(db, "create_all", mock.Mock())
-    table_names = [
+    table_names = [  # Order matters for dependencies
         "agency",
         "calendar",
         "calendar_attribute",
@@ -35,6 +35,7 @@ def test_init(batch_size_to_set, batch_size_expected, db, monkeypatch):
         "route_pattern",
         "trip",
         "stop_time",
+        "linked_dataset",
     ]
     loader_args = [db] + batch_size_to_set
 
