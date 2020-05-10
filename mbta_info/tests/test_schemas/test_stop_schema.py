@@ -45,7 +45,7 @@ def test_load_good_data(pop_keys: str, stop_data: typing.Dict):
         if key == "stop_lat":
             key = "latitude"
             value = float(value)
-        elif key in "stop_lon":
+        elif key == "stop_lon":
             key = "longitude"
             value = float(value)
         elif key == "location_type":

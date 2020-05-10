@@ -73,7 +73,7 @@ def agency(db) -> mbta_models.Agency:
 
 @pytest.fixture
 def line(db) -> mbta_models.Line:
-    line_obj = mbta_models.Line("Test Line", "Test Line Name")
+    line_obj = mbta_models.Line("line1", "Test Line Name")
     db.session.add(line_obj)
     db.session.commit()
     return line_obj
@@ -82,7 +82,7 @@ def line(db) -> mbta_models.Line:
 @pytest.fixture
 def route(db, agency: mbta_models.Agency) -> mbta_models.Route:
     route_obj = mbta_models.Route(
-        "Route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0
+        "route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0
     )
     db.session.add(route_obj)
     db.session.commit()
@@ -91,14 +91,14 @@ def route(db, agency: mbta_models.Agency) -> mbta_models.Route:
 
 @pytest.fixture
 def stop(db) -> mbta_models.Stop:
-    stop_obj = mbta_models.Stop("Stop1")
+    stop_obj = mbta_models.Stop("stop1")
     db.session.add(stop_obj)
     db.session.commit()
     return stop_obj
 
 
 @pytest.fixture
-def calendar(db):
+def calendar(db) -> mbta_models.Calendar:
     today = datetime.date.today()
     tomorrow = today + datetime.timedelta(days=1)
     calendar_obj = mbta_models.Calendar(
@@ -110,8 +110,26 @@ def calendar(db):
 
 
 @pytest.fixture
-def route_pattern(db, route: mbta_models.Route):
+def route_pattern(db, route: mbta_models.Route) -> mbta_models.RoutePattern:
     route_pattern_obj = mbta_models.RoutePattern("route_pattern1", f"{route.route_id}")
     db.session.add(route_pattern_obj)
     db.session.commit()
     return route_pattern_obj
+
+
+@pytest.fixture
+def trip(
+    db, route: mbta_models.Route, calendar: mbta_models.Calendar
+) -> mbta_models.Trip:
+    trip_obj = mbta_models.Trip("trip1", f"{route.route_id}", f"{calendar.service_id}")
+    db.session.add(trip_obj)
+    db.session.commit()
+    return trip_obj
+
+
+@pytest.fixture
+def checkpoint(db):
+    checkpoint_obj = mbta_models.Checkpoint("checkpoint1", "Checkpoint Name")
+    db.session.add(checkpoint_obj)
+    db.session.commit()
+    return checkpoint_obj

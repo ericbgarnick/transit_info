@@ -44,7 +44,7 @@ def test_numbered_type_enum_key_with_default(
 
 @pytest.mark.parametrize("time_string", ["", "10-10-10", "10:10", "a:b:c", "abc123"])
 def test_time_as_seconds_bad_value(time_string: str):
-    with pytest.raises(ValueError):
+    with pytest.raises(mm.ValidationError):
         schema_utils.time_as_seconds(time_string)
 
 

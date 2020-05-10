@@ -25,13 +25,11 @@ def test_load_good_data(checkpoint_data: typing.Dict):
 
 @pytest.mark.parametrize(
     "checkpoint_data_update",
-    (
-        {"checkpoint_id": ""},
-        {"checkpoint_name": ""},
-        {"bad_key": "anything"},
-    ),
+    ({"checkpoint_id": ""}, {"checkpoint_name": ""}, {"bad_key": "anything"},),
 )
-def test_load_bad_data(checkpoint_data_update: typing.Dict, checkpoint_data: typing.Dict):
+def test_load_bad_data(
+    checkpoint_data_update: typing.Dict, checkpoint_data: typing.Dict
+):
     # GIVEN
     checkpoint_data.update(checkpoint_data_update)
 

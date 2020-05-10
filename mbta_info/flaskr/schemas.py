@@ -325,10 +325,10 @@ class CheckpointSchema(mm.Schema):
 
 
 class StopTimeSchema(mm.Schema):
-    trip_id = mm.fields.Str(required=True)
+    trip_id = mbta_fields.StringForeignKey(mbta_models.Trip, required=True)
     arrival_time = mm.fields.Int(required=True)
     departure_time = mm.fields.Int(required=True)
-    stop_id = mm.fields.Str(required=True)
+    stop_id = mbta_fields.StringForeignKey(mbta_models.Stop, required=True)
     stop_sequence = mm.fields.Int(required=True)
     stop_headsign = mm.fields.Str()
     pickup_type = EnumField(mbta_models.PickupDropOffType)
