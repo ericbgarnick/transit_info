@@ -62,7 +62,7 @@ class GeoMixin:
             ).first()
         except DataError:
             logger.exception(
-                f"Failed to get lon, lat for Shape {inspect(self).identity[0]}"
+                f"Failed to get lon, lat for {inspect(self).class_} with id {inspect(self).identity[0]}"
             )
             lon, lat = None, None
         finally:

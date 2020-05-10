@@ -12,7 +12,7 @@ class GeoStub(db.Model, models.GeoMixin):
     lonlat_field = "lonlat_column"
 
     geo_stub_id = db.Column(db.Integer, primary_key=True)
-    lonlat_column = db.Column(geoalchemy2.Geometry("POINT"))
+    lonlat_column = db.Column(geoalchemy2.Geometry("POINT"), nullable=False)
 
     def __init__(self, geo_stub_id: int, longitude: float, latitude: float):
         self.geo_stub_id = geo_stub_id
