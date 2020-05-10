@@ -10,6 +10,8 @@ from mbta_info.flaskr import fields as mbta_fields
 
 logger = logging.getLogger(__name__)
 
+DATE_INPUT_FORMAT = "%Y%m%d"
+
 
 class AgencySchema(mm.Schema):
     agency_id = mm.fields.Int(required=True)
@@ -144,8 +146,6 @@ class StopSchema(mm.Schema):
 
 
 class CalendarSchema(mm.Schema):
-    DATE_INPUT_FORMAT = "%Y%m%d"
-
     service_id = mm.fields.Str(required=True)
     monday = mm.fields.Bool(required=True)
     tuesday = mm.fields.Bool(required=True)
@@ -185,6 +185,35 @@ class CalendarSchema(mm.Schema):
             data.pop("sunday"),
             data.pop("start_date"),
             data.pop("end_date"),
+        )
+
+
+class CalendarAttributeSchema(mm.Schema):
+    service_id = mbta_fields.StringForeignKey(mbta_models.Calendar, required=True)
+    service_description = mm.fields.Str(required=True)
+    service_schedule_name = mm.fields.Str(required=True)
+    service_schedule_type = EnumField(mbta_models.ServiceScheduleType, required=True)
+    service_schedule_typicality = EnumField(mbta_models.ServiceScheduleTypicality)
+    rating_start_date = mm.fields.Date(format=DATE_INPUT_FORMAT)
+    rating_end_date = mm.fields.Date(format=DATE_INPUT_FORMAT)
+    rating_description = mm.fields.Str()
+
+    @mm.pre_load
+    def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        in_data["service_schedule_type"] = in_data["service_schedule_type"].lower()
+        in_data["service_schedule_typicality"] = schema_utils.numbered_type_enum_key(
+            in_data["service_schedule_typicality"]
+        )
+        return {k: v for k, v in in_data.items() if v}
+
+    @mm.post_load
+    def make_calendar_attribute(self, data: typing.Dict, **kwargs) -> mbta_models.CalendarAttribute:
+        return mbta_models.CalendarAttribute(
+            data.pop("service_id"),
+            data.pop("service_description"),
+            data.pop("service_schedule_name"),
+            data.pop("service_schedule_type"),
+            **data,
         )
 
 

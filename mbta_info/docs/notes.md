@@ -1,20 +1,28 @@
-Find hanging queries:
+#### Find hanging queries:
 
 `SELECT pid, query FROM pg_stat_activity WHERE state = 'active';`
 
-Kill hanging queries:
+---
+
+#### Kill hanging queries:
 
 `SELECT pg_terminate_backend(PID);`
 
-Find Python processes:
+---
+
+#### Find Python processes:
 
 `ps -fA | grep python`
 
-Kill process:
+---
+
+#### Kill process:
 
 `kill -9 pid`
 
-Create new database:
+---
+
+#### Create new database:
 
 ```
 $ psql ericgarnick
@@ -23,6 +31,17 @@ ericgarnick=# \c <db_name>
 <db_name>=# CREATE EXTENSION postgis;
 ```
 
-MBTA reference: 
+---
+
+#### MBTA reference: 
 
 https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md
+
+---
+
+#### Adding a new data sheet
+
+1. Update config_development.yaml with a mapping from the table name to the file name, placed in the list after any files it depends on
+2. Create a new db model in flaskr/models.py
+3. Create a marshmallow schema in flaskr/schemas.py
+4. Add unit tests for the schema (see existing schema tests for examples)

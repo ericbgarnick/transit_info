@@ -34,7 +34,7 @@ def test_load_good_data(calendar_data: typing.Dict):
             value = bool(int(value))
         elif key.endswith("date"):
             value = datetime.datetime.strptime(
-                value, schemas.CalendarSchema.DATE_INPUT_FORMAT
+                value, schemas.DATE_INPUT_FORMAT
             ).date()
         assert getattr(calendar_obj, key) == value
 

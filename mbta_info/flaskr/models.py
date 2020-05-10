@@ -309,6 +309,63 @@ class Calendar(db.Model):
         return f"<Calendar: {self.service_id} ({self.start_date}-{self.end_date})>"
 
 
+class ServiceScheduleType(enum.Enum):
+    weekday = "weekday"
+    saturday = "saturday"
+    sunday = "sunday"
+    other = "other"
+
+
+class ServiceScheduleTypicality(enum.Enum):
+    type_0 = "not_defined"  # Also default when no value provided
+    type_1 = "typical_service"  # With perhaps minor modifications
+    type_2 = "supplemental_service"  # Supplements typical schedules
+    type_3 = "holiday_service"  # Provided by typical Saturday or Sunday schedule
+    type_4 = "planned_disruption"  # Major change, example cause: construction
+    type_5 = "atypical_reduction"  # Major reduction due to unplanned events like weather
+
+
+class CalendarAttribute(db.Model):
+    """
+    Adds human-readable names to calendar service_ids and further information about
+    when they operate and how closely the service aligns to service on a typical day.
+    Requires: service_id, service_description, service_schedule_name, service_schedule_type
+    Relies on: Calendar
+    Reference: https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md#calendar_attributestxt
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(
+        db.String(64), db.ForeignKey("calendar.service_id"), nullable=False, index=True
+    )
+    service = db.relationship("Calendar", backref="attributes")
+    service_description = db.Column(db.String(64), nullable=False)
+    service_schedule_name = db.Column(db.String(64), nullable=False)
+    service_schedule_type = db.Column(db.Enum(ServiceScheduleType), nullable=False)
+    service_schedule_typicality = db.Column(db.Enum(ServiceScheduleTypicality))
+    rating_start_date = db.Column(db.Date())
+    rating_end_date = db.Column(db.Date())
+    rating_description = db.Column(db.String(32))
+
+    def __init__(
+            self,
+            service_id: str,
+            service_description: str,
+            service_schedule_name: str,
+            service_schedule_type: ServiceScheduleType,
+            **kwargs,
+    ):
+        self.service_id = service_id
+        self.service_description = service_description
+        self.service_schedule_name = service_schedule_name
+        self.service_schedule_type = service_schedule_type
+
+        for fieldname, value in kwargs.items():
+            setattr(self, fieldname, value)
+
+    def __repr__(self):
+        return f"<CalendarAttribute: {self.id} (Calendar {self.service_id})>"
+
+
 class Shape(db.Model, GeoMixin):
     """
     A rule for mapping vehicle travel paths, sometimes referred to as a route alignment
