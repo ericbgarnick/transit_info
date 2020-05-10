@@ -306,7 +306,7 @@ class RoutePatternSchema(mm.Schema):
     direction_id = bv.BinaryValue()
     route_pattern_name = mm.fields.Str()
     route_pattern_time_desc = mm.fields.Str()
-    route_pattern_typicality = EnumField(mbta_models.TypicalityType)
+    route_pattern_typicality = EnumField(mbta_models.RoutePatternTypicality)
     route_pattern_sort_order = mm.fields.Int()
     representative_trip_id = mm.fields.Str()
 

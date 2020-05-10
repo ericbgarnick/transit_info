@@ -507,7 +507,7 @@ class Direction(db.Model):
         return f"<Direction: {self.route_id} ({self.direction} -> {self.direction_destination})>"
 
 
-class TypicalityType(enum.Enum):
+class RoutePatternTypicality(enum.Enum):
     type_0 = "not_defined"
     type_1 = "typical"  # Usually 1 pattern per route, occasionally 2, rarely more
     type_2 = "deviation"
@@ -533,7 +533,7 @@ class RoutePattern(db.Model):
     direction_id = db.Column(db.SmallInteger, nullable=True)  # 0 or 1
     route_pattern_name = db.Column(db.String(128), nullable=True)
     route_pattern_time_desc = db.Column(db.String(32), nullable=True)
-    route_pattern_typicality = db.Column(db.Enum(TypicalityType), nullable=True)
+    route_pattern_typicality = db.Column(db.Enum(RoutePatternTypicality), nullable=True)
     route_pattern_sort_order = db.Column(db.Integer, nullable=True)
     representative_trip_id = db.Column(
         db.String(128), nullable=True
@@ -615,7 +615,7 @@ class PickupDropOffType(enum.Enum):
     type_0 = "regularly_scheduled"
     type_1 = "none_available"
     type_2 = "arrange_with_agency"
-    type_3 = "arrange_with_driver"
+    type_3 = "arrange_with_driver"  # This may be "flag" type, denoted as "F" (rider must notify driver)
 
 
 class StopTime(db.Model):
@@ -637,12 +637,12 @@ class StopTime(db.Model):
     stop_headsign = db.Column(db.String(128), nullable=True)
     pickup_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
     drop_off_type = db.Column(db.Enum(PickupDropOffType), nullable=True)
-    shape_dist_traveled = db.Column(
+    shape_dist_traveled = db.Column(  # Distance traveled (in meters) from the first stop to this stop
         db.Float(), nullable=True
-    )  # Distance traveled from the first stop to this stop
-    timepoint = db.Column(
+    )
+    timepoint = db.Column(  # 0 = times are approximate, 1 = times are exact
         db.SmallInteger(), nullable=True
-    )  # 0 = times are approximate, 1 = times are exact
+    )
     checkpoint_id = db.Column(
         db.String(16), db.ForeignKey("checkpoint.checkpoint_id"), nullable=True
     )

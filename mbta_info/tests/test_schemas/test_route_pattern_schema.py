@@ -28,7 +28,7 @@ def test_load_good_data(route_pattern_data: typing.Dict):
         if key in ["direction_id", "route_pattern_sort_order"]:
             value = int(value)
         elif key == "route_pattern_typicality":
-            value = getattr(mbta_models.TypicalityType, value)
+            value = getattr(mbta_models.RoutePatternTypicality, value)
         assert getattr(route_pattern_obj, key) == value
 
 
