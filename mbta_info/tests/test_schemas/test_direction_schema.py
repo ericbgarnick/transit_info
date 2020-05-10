@@ -24,6 +24,8 @@ def test_load_good_data(direction_data: typing.Dict):
     for key, value in direction_data.items():
         if key == "direction_id":
             value = int(value)
+        elif key == "direction":
+            value = getattr(mbta_models.DirectionOption, value.lower())
         assert getattr(direction_obj, key) == value
 
 
@@ -38,7 +40,7 @@ def test_load_data_missing_route(direction_data: typing.Dict):
     "direction_data_update",
     (
         {"direction_id": "2"},
-        {"direction": ""},
+        {"direction": "Away"},
         {"direction_destination": ""},
         {"bad_key": "anything"},
     ),

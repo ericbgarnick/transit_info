@@ -449,12 +449,30 @@ class Shape(db.Model, GeoMixin):
         return f"<Shape: {self.shape_id} @ ({self.longitude}, {self.latitude})>"
 
 
+class DirectionOption(enum.Enum):
+    north = "North"
+    south = "South"
+    east = "East"
+    west = "West"
+    northeast = "Northeast"
+    northwest = "Northwest"
+    southeast = "Southeast"
+    southwest = "Southwest"
+    clockwise = "Clockwise"
+    counterclockwise = "Counterclockwise"
+    inbound = "Inbound"
+    outbound = "Outbound"
+    loop_a = "Loop A"
+    loop_b = "Loop B"
+    loop = "Loop"
+
+
 class Direction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     route_id = db.Column(db.String(64), db.ForeignKey("route.route_id"), nullable=False)
     route = db.relationship("Route", backref="directions")
     direction_id = db.Column(db.SmallInteger, nullable=False)  # 0 or 1
-    direction = db.Column(db.String(16), nullable=False)
+    direction = db.Column(db.Enum(DirectionOption), nullable=False)
     direction_destination = db.Column(db.String(64), nullable=False)
 
     def __init__(

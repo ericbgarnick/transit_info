@@ -268,11 +268,12 @@ class ShapeSchema(mm.Schema):
 class DirectionSchema(mm.Schema):
     route_id = fk_fields.StringForeignKey(mbta_models.Route, required=True)
     direction_id = bv.BinaryValue(required=True)
-    direction = mm.fields.Str(required=True)
+    direction = EnumField(mbta_models.DirectionOption, required=True)
     direction_destination = mm.fields.Str(required=True)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
+        in_data["direction"] = in_data["direction"].lower()
         return {k: v for k, v in in_data.items() if v}
 
     def load(self, *args, **kwargs) -> typing.Optional[mbta_models.Direction]:
