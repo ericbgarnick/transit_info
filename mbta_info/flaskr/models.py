@@ -186,6 +186,8 @@ class Route(db.Model):
     route_fare_class = db.Column(db.Enum(FareClass), nullable=True)
     line_id = db.Column(db.String(32), db.ForeignKey("line.line_id"), nullable=True)
     line = db.relationship("Line", backref="routes")
+    # 0: should list route publicly, 1: should not list route publicly
+    listed_route = db.Column(db.SmallInteger, nullable=False)
 
     def __init__(
         self,
@@ -193,12 +195,14 @@ class Route(db.Model):
         agency_id: int,
         long_name: str,
         route_type: RouteType,
+        listed_route: int,
         **kwargs,
     ):
         self.route_id = route_id
         self.agency_id = agency_id
         self.route_long_name = long_name
         self.route_type = route_type
+        self.listed_route = listed_route
 
         for fieldname, value in kwargs.items():
             setattr(self, fieldname, value)

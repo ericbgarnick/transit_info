@@ -82,7 +82,7 @@ def line(db) -> mbta_models.Line:
 @pytest.fixture
 def route(db, agency: mbta_models.Agency) -> mbta_models.Route:
     route_obj = mbta_models.Route(
-        "route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0
+        "route1", agency.agency_id, "Route Name", mbta_models.RouteType.type_0, 0
     )
     db.session.add(route_obj)
     db.session.commit()

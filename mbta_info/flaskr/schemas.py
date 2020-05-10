@@ -71,10 +71,10 @@ class RouteSchema(mm.Schema):
     route_sort_order = mm.fields.Int()
     route_fare_class = EnumField(mbta_models.FareClass)
     line_id = fk_fields.StringForeignKey(mbta_models.Line)
+    listed_route = bv.BinaryValue(missing=0)
 
     @mm.pre_load
     def convert_input(self, in_data: typing.Dict, **kwargs) -> typing.Dict:
-        in_data.pop("listed_route", None)
         in_data["route_type"] = schema_utils.numbered_type_enum_key(
             in_data["route_type"]
         )
@@ -90,6 +90,7 @@ class RouteSchema(mm.Schema):
             data.pop("agency_id"),
             data.pop("route_long_name"),
             data.pop("route_type"),
+            data.pop("listed_route"),
             **data,
         )
 
