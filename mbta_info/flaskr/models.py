@@ -6,11 +6,12 @@ import typing
 
 import pycountry
 import pytz
+from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
 from sqlalchemy import func, inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr.database import db
+from mbta_info.flaskr.database import db  # type: SQLAlchemy
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,12 @@ LangCode = enum.Enum(  # type: ignore[misc]
         if getattr(lang, "alpha_2", None)
     },
 )
+
+
+class TimeStamppedModel(db.Model):
+    """An abstract base model for including creation and update timestamps"""
+    __abstract__ = True
+    created = db.Column(db.DateTime)
 
 
 class GeoMixin:

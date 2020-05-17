@@ -90,9 +90,9 @@ class Loader:
                 instance_pk = getattr(model_instance, model_pk_field)
                 if instance_pk in existing_pks:
                     # Update existing
-                    instance_dict = (
+                    instance_dict = (  # Some values must be converted from data_row format
                         model_instance.__dict__
-                    )  # Some values must be converted from data_row format
+                    )
                     instance_dict.pop("_sa_instance_state", None)
                     self.db.session.query(model).filter(
                         getattr(model, model_pk_field) == instance_pk
