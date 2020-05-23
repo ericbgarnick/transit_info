@@ -2,7 +2,7 @@ import marshmallow as mm
 import pytest
 import typing
 
-from mbta_info.flaskr import schemas, schema_utils, models as mbta_models
+from flaskr import schemas, schema_utils, models as mbta_models
 
 
 @pytest.fixture

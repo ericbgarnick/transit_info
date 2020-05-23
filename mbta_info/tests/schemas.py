@@ -2,8 +2,8 @@ import marshmallow as mm
 import typing
 from marshmallow_enum import EnumField
 
-from mbta_info.flaskr import schema_utils
-from mbta_info.tests import models as test_models
+from flaskr import schema_utils
+from tests import models as test_models
 
 
 class GeoStubSchema(mm.Schema):

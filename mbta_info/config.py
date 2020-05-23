@@ -14,7 +14,6 @@ class Config:
 
         self._config_file = pathlib.Path(
             pathlib.Path(__name__).absolute().parent,
-            "mbta_info",
             f"config_{self._flask_env}.yaml",
         )
 

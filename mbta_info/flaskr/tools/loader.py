@@ -9,8 +9,8 @@ from flask_sqlalchemy import SQLAlchemy, Model
 from marshmallow import Schema, ValidationError
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr import model_utils
-from mbta_info.flaskr.tools.utils import model_name_from_table_name
+from flaskr import model_utils
+from flaskr.tools.utils import model_name_from_table_name
 
 
 class Loader:

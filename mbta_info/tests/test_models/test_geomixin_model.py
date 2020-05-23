@@ -1,5 +1,5 @@
-from mbta_info.flaskr import models as mbta_models
-from mbta_info.tests import models as test_models
+from flaskr import models as mbta_models
+from tests import models as test_models
 
 
 def test_lonlat_from_cache(monkeypatch):

@@ -1,4 +1,4 @@
-from mbta_info.flaskr import create_app, set_g
+from flaskr import create_app, set_g
 
 
 if __name__ == "__main__":

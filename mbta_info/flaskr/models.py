@@ -11,7 +11,7 @@ from geoalchemy2 import Geometry
 from sqlalchemy import func, inspect
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr.database import db  # type: SQLAlchemy
+from flaskr.database import db  # type: SQLAlchemy
 
 logger = logging.getLogger(__name__)
 

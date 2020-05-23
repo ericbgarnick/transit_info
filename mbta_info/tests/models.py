@@ -4,8 +4,8 @@ Models used for testing independent of real data models
 import enum
 import geoalchemy2
 
-from mbta_info.flaskr.database import db
-from mbta_info.flaskr import models
+from flaskr.database import db
+from flaskr import models
 
 
 class GeoStub(db.Model, models.GeoMixin):

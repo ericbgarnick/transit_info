@@ -1,8 +1,8 @@
 import marshmallow as mm
 import pytest
 
-from mbta_info.flaskr.fields import foreign_key as fk_fields
-from mbta_info.tests import models as test_models
+from flaskr.fields import foreign_key as fk_fields
+from tests import models as test_models
 
 
 def test_deserialize_success(test_model: test_models.TestModel):

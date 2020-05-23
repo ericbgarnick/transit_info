@@ -2,8 +2,8 @@ from unittest import mock
 
 import typing
 
-from mbta_info.config import Config
-from mbta_info.flaskr.tools.retriever import Retriever, requests, zipfile
+from config import Config
+from flaskr.tools.retriever import Retriever, requests, zipfile
 
 
 class ResponseStub:

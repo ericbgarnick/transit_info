@@ -3,7 +3,7 @@ from typing import Optional
 import marshmallow as mm
 import pytest
 
-from mbta_info.flaskr import schema_utils
+from flaskr import schema_utils
 
 
 @pytest.mark.parametrize(

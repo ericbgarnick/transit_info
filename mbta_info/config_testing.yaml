@@ -5,10 +5,10 @@ flask:
   DEBUG: true
   TESTING: true
 
-import_dir: "mbta_info.tests"
+import_dir: "tests"
 
 mbta_data:
-  path: "mbta_info/data"
+  path: "data"
   files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
   files:  # table names mapped to data file names
     geo_stub: "geo_stubs.txt"

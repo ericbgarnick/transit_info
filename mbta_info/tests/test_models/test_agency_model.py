@@ -1,4 +1,4 @@
-from mbta_info.flaskr import models as mbta_models
+from flaskr import models as mbta_models
 
 
 def test_create_minimal_agency(db):

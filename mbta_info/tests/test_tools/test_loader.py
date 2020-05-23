@@ -7,9 +7,9 @@ import marshmallow as mm
 
 from sqlalchemy.exc import DataError
 
-from mbta_info.flaskr.tools.loader import Loader
-from mbta_info.tests import models as test_models
-from mbta_info.tests import schemas as test_schemas
+from flaskr.tools.loader import Loader
+from tests import models as test_models
+from tests import schemas as test_schemas
 
 
 @pytest.mark.parametrize(
@@ -117,7 +117,7 @@ def test_get_data_file_path(db):
     # GIVEN
     table_name = "test_model"
     expected_path = pathlib.Path(
-        pathlib.Path(__name__).absolute().parent, f"mbta_info/data/{table_name}s.txt"
+        pathlib.Path(__name__).absolute().parent, f"data/{table_name}s.txt"
     )
 
     # WHEN

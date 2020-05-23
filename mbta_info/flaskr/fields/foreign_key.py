@@ -3,7 +3,7 @@ import typing
 import marshmallow as mm
 from flask_sqlalchemy import Model
 
-from mbta_info.flaskr import model_utils
+from flaskr import model_utils
 
 
 class StringForeignKey(mm.fields.String):

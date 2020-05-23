@@ -2,9 +2,9 @@ import datetime
 
 import pytest
 
-from mbta_info.flaskr.database import db as project_db
-from mbta_info.flaskr import create_app, set_g, models as mbta_models
-from mbta_info.tests import models as test_models
+from flaskr.database import db as project_db
+from flaskr import create_app, set_g, models as mbta_models
+from tests import models as test_models
 
 
 # https://github.com/pytest-dev/pytest/issues/363#issuecomment-406536200

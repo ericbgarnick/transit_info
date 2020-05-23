@@ -46,3 +46,19 @@ https://github.com/mbta/gtfs-documentation/blob/master/reference/gtfs.md
 3. Create a marshmallow schema in flaskr/schemas.py
 4. Add new table name to test_loader::test_init `table_names` list, maintaining the order set in config_development.yaml
 5. Add unit tests for the schema (see existing schema tests for examples)
+
+---
+
+#### Dev env setup
+
+Requirements:
+- Python 3.7
+- RabbitMQ: 
+  - install: `sudo apt-get install rabbitmq-server`
+  - run: `sudo service rabbitmq-server start/stop`
+  - check: `sudo service rabbitmq-server status`
+- Celery:
+  - Foreground worker: `celery -A mbta_info.flaskr.celery.app worker -l info -B`
+  - Background worker: 
+    - `celery multi <cmd> w1 -A mbta_info.flaskr.celery.app -l info`
+    where `<cmd>` is `start`, `restart`, `stop`, `stopwait`

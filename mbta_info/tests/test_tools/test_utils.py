@@ -1,6 +1,6 @@
 import pytest
 
-from mbta_info.flaskr.tools import utils
+from flaskr.tools import utils
 
 
 @pytest.mark.parametrize(

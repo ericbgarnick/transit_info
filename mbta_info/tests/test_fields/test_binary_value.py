@@ -1,7 +1,7 @@
 import marshmallow as mm
 import pytest
 
-from mbta_info.flaskr.fields import binary_value as bv
+from flaskr.fields import binary_value as bv
 
 
 @pytest.mark.parametrize("value", (1, 0, "1", "0", True, False))

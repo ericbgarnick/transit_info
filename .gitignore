@@ -6,3 +6,7 @@ mbta_info/data
 templates/
 .coverage
 htmlcov/
+w*.log
+w*.pid
+*celery*log
+celerybeat-schedule

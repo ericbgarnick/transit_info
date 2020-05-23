@@ -37,13 +37,13 @@ class Retriever:
         """Load config in instance because FLASK_ENV at runtime may be different from load time"""
         try:
             # Running in-app
-            from mbta_info.config import Config
+            from config import Config
         except ModuleNotFoundError:
             # Running from command line
             import sys
             parent_path = str(pathlib.Path(__name__).absolute().parent)
             sys.path.append(parent_path)
-            from mbta_info.config import Config
+            from config import Config
 
         self.config = Config().config
 

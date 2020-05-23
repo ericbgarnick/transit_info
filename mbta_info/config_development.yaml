@@ -4,10 +4,10 @@ flask:
   SQLALCHEMY_TRACK_MODIFICATIONS: false
   DEBUG: true
 
-import_dir: "mbta_info.flaskr"
+import_dir: "flaskr"
 
 mbta_data:
-  path: "mbta_info/data"
+  path: "data"
   files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
   files:  # table names mapped to data file names
     agency: "agency.txt"

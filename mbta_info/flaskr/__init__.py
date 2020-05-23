@@ -1,6 +1,6 @@
 from flask import Flask, g
 
-from mbta_info.config import Config
+from config import Config
 
 
 def create_app():
@@ -11,12 +11,12 @@ def create_app():
     return app
 
 
-def register_extensions(app: Flask, testing):
-    from mbta_info.flaskr.database import db
-    from mbta_info.flaskr import models as mbta_models
+def register_extensions(app: Flask, testing: bool):
+    from flaskr.database import db
+    from flaskr import models as mbta_models
 
     if testing:
-        from mbta_info.tests import models as test_models
+        from tests import models as test_models
     db.init_app(app)
 
 
