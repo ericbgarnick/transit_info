@@ -1,0 +1,27 @@
+
+flask:
+  SQLALCHEMY_DATABASE_URI: "postgresql://postgres:password@postgres/transit_dev:5432"
+  SQLALCHEMY_TRACK_MODIFICATIONS: false
+  DEBUG: true
+
+import_dir: "flaskr"
+
+mbta_data:
+  path: "data"
+  files_url: "https://cdn.mbta.com/MBTA_GTFS.zip"
+  files:  # table names mapped to data file names
+    agency: "agency.txt"
+    calendar: "calendar.txt"
+    calendar_attribute: "calendar_attributes.txt"
+    calendar_date: "calendar_dates.txt"
+    checkpoint: "checkpoints.txt"
+    direction: "directions.txt"
+    line: "lines.txt"
+    linked_dataset: "linked_datasets.txt"
+    route_pattern: "route_patterns.txt"
+    route: "routes.txt"
+    shape: "shapes.txt"
+    stop_time: "stop_times.txt"
+    stop: "stops.txt"
+    trip: "trips.txt"
+    multi_route_trip: "multi_route_trips.txt"

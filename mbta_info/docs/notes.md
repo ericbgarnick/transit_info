@@ -76,5 +76,10 @@ Requirements:
     `sudo docker-compose up -d`
 
 - Run command in a container
+    - `sudo docker container exec -it <container> <command>`
+    - `<command>` := `/bin/sh` for interactive shell
 
-    `sudo docker container exec -it <container> <command>`
+---
+
+#### Search for an apt package
+- `apt-cache search <package>`

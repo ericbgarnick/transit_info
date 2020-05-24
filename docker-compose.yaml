@@ -1,24 +1,40 @@
 version: "3.8"
 services:
+  app:
+    build: ./app.Dockerfile
+    image: &app_img app:1.0
+    environment: &app_env
+      - FLASK_ENV=production
+      - FLASK_APP=main
+    depends_on:
+      - postgres
+    restart: "no"
+
   worker:
     build: .
-    image: &img worker
+    image: *app_img
     command: ["celery", "-A", "flaskr.mbta_celery.app", "worker" ,"-l", "info"]
-    environment: &env
-      - FLASK_ENV=development
+    environment: *app_env
     depends_on:
       - beat
       - rabbit
+      - postgres
     restart: "no"
 
   beat:
     build: .
-    image: *img
+    image: *app_img
     command: ["celery", "-A", "flaskr.mbta_celery.app","beat"]
-    environment: *env
+    environment: *app_env
     depends_on:
       - rabbit
+      - postgres
     restart: "no"
 
   rabbit:
     image: rabbitmq:3.7
+
+  postgres:
+    image: postgis/postgis
+    environment:
+      - POSTGRES_PASSWORD=password
