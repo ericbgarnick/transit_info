@@ -58,7 +58,23 @@ Requirements:
   - run: `sudo service rabbitmq-server start/stop`
   - check: `sudo service rabbitmq-server status`
 - Celery:
-  - Foreground worker: `celery -A mbta_info.flaskr.celery.app worker -l info -B`
+  - Foreground worker (with beat): `celery -A mbta_info.flaskr.celery.app worker -l info -B`
   - Background worker: 
     - `celery multi <cmd> w1 -A mbta_info.flaskr.celery.app -l info`
     where `<cmd>` is `start`, `restart`, `stop`, `stopwait`
+
+---
+
+#### Docker
+
+- Create celery worker image
+
+    `sudo docker build --tag worker:1.0 .`
+
+- Start containers
+
+    `sudo docker-compose up -d`
+
+- Run command in a container
+
+    `sudo docker container exec -it <container> <command>`

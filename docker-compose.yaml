@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  worker:
+    build: .
+    image: &img worker
+    command: ["celery", "-A", "flaskr.mbta_celery.app", "worker" ,"-l", "info"]
+    environment: &env
+      - FLASK_ENV=development
+    depends_on:
+      - beat
+      - rabbit
+    restart: "no"
+
+  beat:
+    build: .
+    image: *img
+    command: ["celery", "-A", "flaskr.mbta_celery.app","beat"]
+    environment: *env
+    depends_on:
+      - rabbit
+    restart: "no"
+
+  rabbit:
+    image: rabbitmq:3.7
