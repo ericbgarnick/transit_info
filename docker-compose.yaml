@@ -1,10 +1,11 @@
 version: "3.8"
 services:
   app:
-    build: ./app.Dockerfile
+    build: .
     image: &app_img app:1.0
+    command: ["flask", "run"]
     environment: &app_env
-      - FLASK_ENV=production
+      - FLASK_ENV=docker
       - FLASK_APP=main
     depends_on:
       - postgres
@@ -36,5 +37,7 @@ services:
 
   postgres:
     image: postgis/postgis
+    volumes:
+      - .:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_PASSWORD=password
