@@ -35,7 +35,7 @@ packaging==20.3
 pathspec==0.8.0
 pluggy==0.13.1
 psycopg2==2.8.4
-py==1.8.1
+py==1.10.0
 pycountry==19.8.18
 Pygments==2.5.2
 pyparsing==2.4.7
