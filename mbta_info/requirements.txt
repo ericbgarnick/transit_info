@@ -6,7 +6,7 @@ billiard==3.6.3.0
 black==19.10b0
 blessings==1.7
 bpython==0.18
-celery==4.4.2
+celery==5.2.2
 certifi==2019.11.28
 chardet==3.0.4
 Click==7.0
